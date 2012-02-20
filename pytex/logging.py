@@ -43,8 +43,8 @@ class LevelColoringFormatter(logging.Formatter):
         level = level // 10 * 10
 
         color = LevelColoringFormatter.LEVELS_TO_COLORS[level]
-        return s.replace(record.levelname, self.hilite(record.levelname, color=color), 1)
-
+        return s.replace(record.levelname,
+                self.hilite(record.levelname, color=color), 1)
 
 
 class StdioOnnaStick(object):
@@ -99,11 +99,12 @@ class LoggingSubsystem(object):
     def start(self):
         # Configure logging
         file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - " \
-                                        "%(name)s - %(message)s (%(pathname)s:%(lineno)d)")
-        console_formatter = LevelColoringFormatter("%(levelname)10s: %(message)s")
+                "%(name)s - %(message)s (%(pathname)s:%(lineno)d)")
+        console_formatter = LevelColoringFormatter("%(levelname)10s: " \
+                "%(message)s")
 
-        # All console output not explicitly directed to the user should be a log
-        # message instead
+        # All console output not explicitly directed to the user should be
+        # a log message instead
         self.console_handler = logging.StreamHandler(sys.__stdout__)
         self.console_handler.setFormatter(console_formatter)
         self.console_handler.setLevel(self.verbosity)

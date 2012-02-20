@@ -5,8 +5,7 @@ import os
 import argparse
 import pytex
 
-from pytex import logging
-from pytex import subcommands
+from pytex import logging, settings, subcommands
 
 
 def build_parser():

@@ -13,15 +13,14 @@ class Command(object):
     """
 
     parser_class = argparse.ArgumentParser
-
+    help = ''
 
     def attach(self, parser):
         subparser = self.parser()
         subparser.set_defaults(command=self)
         parser.attach_parser(self.name, subparser, help=self.help)
 
-
-    def parser(self, parser):
+    def parser(self):
         return self.parser_class()
 
     def execute(self, args):
@@ -42,7 +41,6 @@ class _AttachableSubParsersAction(argparse._SubParsersAction):
         return parser
 
 
-
 def load(package):
     base = os.path.dirname(importlib.import_module(package).__file__)
 
@@ -59,7 +57,7 @@ def load(package):
 def attach(parser, subcommands):
     parser.register('action', 'parsers', _AttachableSubParsersAction)
 
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(title='subcommands')
     for command in subcommands:
         command.attach(subparsers)
 

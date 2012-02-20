@@ -10,16 +10,16 @@ from pytex import subcommands
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description="Hello")
+    parser = argparse.ArgumentParser(description='')
 
     parser.add_argument('--version', action='version',
                         version='%(prog)s ' + pytex.VERSION)
     parser.add_argument('-v', '--verbose', default=list(),
-                        action='append_const', const=1, help="Increments the " \
-                        "verbosity (can be used multiple times).")
+                        action='append_const', const=1, help='Increments the' \
+                        ' verbosity (can be used multiple times).')
     parser.add_argument('-q', '--quiet', default=list(),
-                        action='append_const', const=1, help="Decrements the " \
-                        "verbosity (can be used multiple times).")
+                        action='append_const', const=1, help='Decrements the' \
+                        ' verbosity (can be used multiple times).')
 
     commands = subcommands.load('pytex.commands')
     subcommands.attach(parser, commands)
@@ -42,7 +42,8 @@ def main(args=None):
     logger.capture_stdout()
 
     # Execute command
-    res = args.command.execute(args)
+    command_logger = logger.command_logger(args.command.name)
+    res = args.command.execute(args, command_logger)
 
     # Shutdown logging
     logger.stop(res)

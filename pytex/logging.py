@@ -115,7 +115,7 @@ class LoggingSubsystem(object):
         self.file_handler.setLevel(logging.ERROR)
 
         # Buffer the logging until no errors happen
-        self.buffered_handler = logging.handlers.MemoryHandler(9999, logging.CRITICAL)
+        self.buffered_handler = logging.handlers.MemoryHandler(9999, CRITICAL)
         self.buffered_handler.setTarget(self.file_handler)
 
         logger = logging.getLogger()

@@ -3,7 +3,9 @@ Tools and utilities to work with subcommands and argparse.
 """
 
 import os
+import inspect
 import importlib
+import itertools
 import argparse
 
 
@@ -47,6 +49,10 @@ class _AttachableSubParsersAction(argparse._SubParsersAction):
         return parser
 
 
+def iscommand(obj):
+    return isinstance(obj, Command)
+
+
 def load(package):
     base = os.path.dirname(importlib.import_module(package).__file__)
 
@@ -55,7 +61,10 @@ def load(package):
     commands = (c for c in commands if c.endswith('.py'))
     commands = (c.rsplit('.', 1)[0] for c in commands)
     commands = ('{}.{}'.format(package, c) for c in commands)
-    commands = (importlib.import_module(c).command for c in commands)
+    commands = (importlib.import_module(c) for c in commands)
+    commands = list((inspect.getmembers(c, iscommand) for c in commands))
+    commands = itertools.chain.from_iterable(commands)
+    commands = (c[1] for c in commands)
 
     return commands
 

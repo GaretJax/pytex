@@ -5,8 +5,7 @@ import os
 import argparse
 import pytex
 
-from pytex import logging
-from pytex import subcommands
+from pytex import logging, settings, subcommands
 
 
 def build_parser():
@@ -41,8 +40,12 @@ def main(args=None):
     logger.increment_verbosity(len(args.verbose) - len(args.quiet))
     logger.capture_stdout()
 
+    # Load settings
+    config = settings.load_config()
+
     # Execute command
     args.command.set_logger(logger)
+    args.command.set_config(config)
     res = args.command.execute(args)
 
     # Shutdown logging

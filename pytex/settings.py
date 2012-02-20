@@ -3,10 +3,8 @@ Configuration management for the different pytex components.
 """
 
 
-
 import os
 import ConfigParser
-
 
 
 DEFAULT_FILES = [
@@ -14,7 +12,6 @@ DEFAULT_FILES = [
     os.path.expanduser('~/.pytex.conf'),
     os.path.join(os.path.realpath('.'), 'pytex.conf'),
 ]
-
 
 
 def loadConfig(path=None, defaults=None):

@@ -141,5 +141,6 @@ class LoggingSubsystem(object):
             self.buffered_handler.flush()
             self.buffered_handler.close()
 
-            print >>sys.__stdout__, "pytex exited with a non-zero exit status (%d). " \
-                  "A complete log was stored in the %s file." % (status, self.logfile)
+            print >>sys.__stdout__, "pytex exited with a non-zero exit " \
+                    "status (%d). A complete log was stored in the %s " \
+                    "file." % (status, self.logfile)

@@ -7,7 +7,6 @@ import importlib
 import argparse
 
 
-
 class Command(object):
     """
     Superclass for each
@@ -25,10 +24,8 @@ class Command(object):
     def parser(self, parser):
         return self.parser_class()
 
-
     def execute(self, args):
         raise NotImplementedError()
-
 
 
 class _AttachableSubParsersAction(argparse._SubParsersAction):
@@ -57,7 +54,6 @@ def load(package):
     commands = (importlib.import_module(c).command for c in commands)
 
     return commands
-
 
 
 def attach(parser, subcommands):

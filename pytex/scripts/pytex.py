@@ -9,7 +9,6 @@ from pytex import logging
 from pytex import subcommands
 
 
-
 def build_parser():
     parser = argparse.ArgumentParser(description="Hello")
 
@@ -26,7 +25,6 @@ def build_parser():
     subcommands.attach(parser, commands)
 
     return parser
-
 
 
 def main(args=None):
@@ -50,7 +48,6 @@ def main(args=None):
     logger.stop(res)
 
     return res
-
 
 
 if __name__ == '__main__':

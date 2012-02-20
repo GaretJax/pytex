@@ -22,7 +22,6 @@ class LevelColoringFormatter(logging.Formatter):
         50: RED,
     }
 
-
     def hilite(self, string, color=None, bold=False, background=None):
         attr = []
 
@@ -36,7 +35,6 @@ class LevelColoringFormatter(logging.Formatter):
             attr.append('1')
 
         return '\x1b[{0}m{1}\x1b[0m'.format(';'.join(attr), string)
-
 
     def format(self, record):
         s = super(LevelColoringFormatter, self).format(record)
@@ -59,7 +57,6 @@ class StdioOnnaStick(object):
     mode = 'wb'
     name = '<stdio (log)>'
     closed = 0
-
 
     def __init__(self, callback):
         self.buf = ''

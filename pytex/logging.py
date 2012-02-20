@@ -123,7 +123,10 @@ class LoggingSubsystem(object):
         logger.addHandler(self.console_handler)
         logger.addHandler(self.buffered_handler)
 
-    def captureStdout(self):
+    def get_logger(self, name):
+        return logger.getLogger(name)
+
+    def capture_stdout(self):
         sys.stdout = StdioOnnaStick(logging.getLogger('stdout').info)
         sys.stderr = StdioOnnaStick(logging.getLogger('stderr').error)
 

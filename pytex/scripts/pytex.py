@@ -39,7 +39,7 @@ def main(args=None):
 
     # Set the verbosity level
     logger.increment_verbosity(len(args.verbose) - len(args.quiet))
-    logger.captureStdout()
+    logger.capture_stdout()
 
     # Execute command
     res = args.command.execute(args)

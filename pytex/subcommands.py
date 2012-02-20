@@ -23,6 +23,9 @@ class Command(object):
     def set_logger(self, logger):
         self.logger = logger.get_logger(self.name)
 
+    def set_config(self, config):
+        self.config = config
+
     def parser(self):
         return self.parser_class()
 

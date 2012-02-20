@@ -20,6 +20,9 @@ class Command(object):
         subparser.set_defaults(command=self)
         parser.attach_parser(self.name, subparser, help=self.help)
 
+    def set_logger(self, logger):
+        self.logger = logger.get_logger(self.name)
+
     def parser(self):
         return self.parser_class()
 

@@ -14,7 +14,7 @@ DEFAULT_FILES = [
 ]
 
 
-def loadConfig(path=None, defaults=None):
+def load_config(path=None, defaults=None):
     """
     Loads and parses an INI style configuration file using Python's built-in
     ConfigParser module.

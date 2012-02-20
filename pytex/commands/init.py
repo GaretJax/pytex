@@ -14,8 +14,7 @@ class Init(Command):
 
         return parser
 
-
-    def execute(self, args, logger):
+    def execute(self, args):
         path = os.path.realpath(args.path)
         base = os.path.dirname(path)
 
@@ -23,7 +22,7 @@ class Init(Command):
             print "The given name is already taken"
             return 1
 
-        logger.log("Create")
+        self.logger.info("Create")
 
         print base
 

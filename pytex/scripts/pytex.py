@@ -42,8 +42,8 @@ def main(args=None):
     logger.capture_stdout()
 
     # Execute command
-    command_logger = logger.command_logger(args.command.name)
-    res = args.command.execute(args, command_logger)
+    args.command.set_logger(logger)
+    res = args.command.execute(args)
 
     # Shutdown logging
     logger.stop(res)

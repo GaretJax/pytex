@@ -1,6 +1,6 @@
 from pytex.subcommands import Command
 
-import os
+import os, shutil
 
 
 class Init(Command):
@@ -22,7 +22,14 @@ class Init(Command):
             print "The given name is already taken"
             return 1
 
-        self.logger.info("Create")
+        self.logger.info("Creating new pytex document at '{}'".format(path))
+
+        template = os.path.join(
+            os.path.expanduser(self.config.get('templates', 'directory')),
+            self.config.get('templates', 'default')
+        )
+
+        shutil.copytree(template, path)
 
         print base
 

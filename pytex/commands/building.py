@@ -6,7 +6,7 @@ import shlex
 import shutil
 import time
 
-from pytex.monitors import fsevents as monitor
+from pytex.monitors import monitor
 
 
 class Compile(Command):

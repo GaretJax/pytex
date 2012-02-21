@@ -51,7 +51,8 @@ setup(
     description='Command line utility to ease working on LaTeX documents.',
     author='Jonathan Stoppani',
     author_email='jonathan@stoppani.name',
-    url='https://github.com/garetjax/pytex',
+    url='https://github.com/garetjax/python-latex',
+    download_url='https://github.com/garetjax/python-tex/tarball/0.1a',
     license='MIT',
     packages=find_packages(),
     package_data = {

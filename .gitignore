@@ -1,0 +1,4 @@
+.virtualenv
+*.egg-info
+pytex.log
+fabfile.py

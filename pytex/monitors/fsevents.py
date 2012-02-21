@@ -3,49 +3,17 @@ from __future__ import absolute_import
 from operator import attrgetter
 
 import fsevents
+from pytex.monitors import base
 
-
-class FSEvent(object):
-    def __init__(self, path):
-        self.path = path
-
-    def __repr__(self):
-        return '{}({})'.format(self.__class__.__name__, self.path)
-
-
-class FileCreated(FSEvent):
-    pass
-
-
-class FileModified(FSEvent):
-    pass
-
-
-class FileDeleted(FSEvent):
-    pass
-
-
-class FileMoved(FSEvent):
-
-    def __init__(self, src, dst):
-        self.src, self.dst = src, dst
-
-    def __repr__(self):
-        return '{}({} -> {})'.format(
-                self.__class__.__name__, self.src, self.dst)
-
-
-class FileCopied(FSEvent):
-    pass
 
 
 class Stream(fsevents.Stream):
 
     EVENT_MAPPINGS = {
-        fsevents.IN_CREATE: FileCreated,
-        fsevents.IN_MODIFY: FileModified,
-        fsevents.IN_DELETE: FileDeleted,
-        (fsevents.IN_MOVED_FROM, fsevents.IN_MOVED_TO): FileMoved,
+        fsevents.IN_CREATE: base.FileCreated,
+        fsevents.IN_MODIFY: base.FileModified,
+        fsevents.IN_DELETE: base.FileDeleted,
+        (fsevents.IN_MOVED_FROM, fsevents.IN_MOVED_TO): base.FileMoved,
     }
 
     def __init__(self, callback, path):

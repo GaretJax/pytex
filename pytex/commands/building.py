@@ -132,4 +132,35 @@ class Watch(Compile):
             observer.stop()
 
 
-vimwatch_command = Watch()
+watch_command = Watch()
+
+
+class Clean(Command):
+
+    name = 'clean'
+
+    def parser(self):
+        parser = self.parser_class()
+        parser.add_argument('--all', '-a', action='store_const', const=True, default=False)
+
+        return parser
+
+
+    def execute(self, args):
+        tempdir = self.config.get('compilation', 'tempdir')
+        tempdir = os.path.realpath(tempdir)
+
+        if os.path.exists(tempdir):
+            self.logger.info('Deleting temp folder at {}'.format(tempdir))
+            shutil.rmtree(tempdir)
+
+        name = os.path.basename(os.getcwd())
+        dest = os.path.join(os.path.realpath('.'), name + '.pdf')
+
+        if args.all and os.path.exists(dest):
+            self.logger.info('Deleting document at {}'.format(dest))
+            os.remove(dest)
+
+        self.logger.info('Done')
+
+clean_command = Clean()

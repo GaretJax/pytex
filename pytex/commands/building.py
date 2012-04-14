@@ -66,16 +66,17 @@ class Compile(Command):
             'master.tex',
         ]
 
+        self.logger.debug(' '.join(cmd))
+
         try:
             subprocess.check_output(cmd)
-        except subprocess.CalledProcessError:
             pass
+        except subprocess.CalledProcessError as e:
+            self.logger.error(e.output)
+            self.logger.error(e)
         else:
             self.logger.info('Done')
-            with file(dest, 'a'):
-                os.utime(dest, None)
-
-        shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
+            shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
 
 
 compile_command = Compile()

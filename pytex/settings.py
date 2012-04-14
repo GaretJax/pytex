@@ -8,6 +8,7 @@ import ConfigParser
 
 
 DEFAULT_FILES = [
+    os.path.join(os.path.dirname(__file__), 'default-settings.ini'),
     '/etc/pytex/pytex.conf',
     os.path.expanduser('~/.pytex.conf'),
     os.path.join(os.path.realpath('.'), 'pytex.conf'),

@@ -60,8 +60,9 @@ class Compile(Command):
 
         cmd = shlex.split(self.config.get('compilation', 'command'))
         cmd += [
-            '-output-directory', tempdir,
-            '-file-line-error',
+            '--output-directory', tempdir,
+            '--file-line-error',
+            '--interaction=nonstopmode',
             'master.tex',
         ]
 

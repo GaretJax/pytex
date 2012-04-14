@@ -23,7 +23,6 @@ class Compile(Command):
         self.mktempdir(tempdir)
         self.compile(tempdir, dest)
 
-    def compile(self, tempdir, dest):
     def mktempdir(self, tempdir):
         # Find every *.tex file in the source directory
         # Recreate the dir tree under tempdir for the dirname of each found *.tex file
@@ -58,6 +57,7 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
+    def compile(self, tempdir, dest):
         cmd = shlex.split(self.config.get('compilation', 'command'))
         cmd += [
             '--output-directory', tempdir,
@@ -86,12 +86,22 @@ class Watch(Compile):
 
     name = 'watch'
 
+    def parser(self):
+        parser = self.parser_class()
+        parser.add_argument('-i', '--initial', help='Execute a build before entering the watching loop', action='store_true')
+
+        return parser
+
+
     def execute(self, args):
+
+        base = os.path.realpath('.')
+
         tempdir = self.config.get('compilation', 'tempdir')
         tempdir = os.path.realpath(tempdir)
 
         name = os.path.basename(os.getcwd())
-        dest = os.path.join(os.path.realpath('.'), name + '.pdf')
+        dest = os.path.join(base, name + '.pdf')
 
         def handler(event):
             if event.path.startswith(tempdir):
@@ -100,8 +110,6 @@ class Watch(Compile):
             if event.path == dest:
                 return
 
-            self.logger.info('Change detected at {}, recompiling...'.format(
-                event.path))
             if os.path.isdir(event.path):
                 self.logger.debug('Ignoring directory \'{}\''.format(relative))
                 return
@@ -116,9 +124,14 @@ class Watch(Compile):
                         os.mkdir(builddir)
                         self.logger.info("Added subdirectory {!r} to the build directory".format(subdir))
 
+            self.logger.info('Change detected at \'{}\', recompiling...'.format(
+                relative))
+            self.compile(tempdir, dest)
 
         self.mktempdir(tempdir)
 
+        if args.initial:
+            self.logger.info('Compiling initial version...'.format(base))
             self.compile(tempdir, dest)
 
         observer = monitor.Observer()

@@ -104,10 +104,22 @@ class Watch(Compile):
         dest = os.path.join(base, name + '.pdf')
 
         def handler(event):
+            relative = event.path[len(base)+1:]
+
             if event.path.startswith(tempdir):
+                self.logger.debug('Ignoring \'{}\''.format(relative))
                 return
 
             if event.path == dest:
+                self.logger.debug('Ignoring \'{}\''.format(relative))
+                return
+
+            if os.path.basename(event.path).startswith('.'):
+                self.logger.debug('Ignoring \'{}\''.format(relative))
+                return
+
+            if os.path.basename(event.path).endswith('~'):
+                self.logger.debug('Ignoring \'{}\''.format(relative))
                 return
 
             if os.path.isdir(event.path):
@@ -133,6 +145,8 @@ class Watch(Compile):
         if args.initial:
             self.logger.info('Compiling initial version...'.format(base))
             self.compile(tempdir, dest)
+
+        self.logger.info('Watching {} for changes...'.format(base))
 
         observer = monitor.Observer()
         observer.monitor(os.path.realpath('.'), handler)

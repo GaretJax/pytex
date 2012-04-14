@@ -11,6 +11,7 @@ class Init(Command):
     def parser(self):
         parser = self.parser_class()
         parser.add_argument('path', metavar='NAME')
+        parser.add_argument('-t', '--template', help='Template name to use')
 
         return parser
 
@@ -24,9 +25,13 @@ class Init(Command):
 
         self.logger.info("Creating new pytex document at '{}'".format(path))
 
+        template_name = args.template or self.config.get('templates', 'default')
+
+        self.logger.info("Selected template '{}'".format(template_name))
+
         template = os.path.join(
             os.path.expanduser(self.config.get('templates', 'directory')),
-            self.config.get('templates', 'default')
+            template_name
         )
 
         shutil.copytree(template, path)

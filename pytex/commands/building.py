@@ -24,14 +24,14 @@ class Compile(Command):
         self.compile(tempdir, dest)
 
     def mktempdir(self, tempdir):
-        # Find every *.tex file in the source directory
-        # Recreate the dir tree under tempdir for the dirname of each found *.tex file
+        # Find every *.tex file in the source directory to ecreate the dir
+        # tree under tempdir for the dirname of each found *.tex file
         matches = set()
 
         for root, dirnames, filenames in os.walk('.', topdown=False):
             if root in matches:
-                # If a subdirectory of root was already scheduled for creation
-                # ignore root altogether
+                # If a subdirectory of root was already scheduled for
+                # creation ignore root altogether
                 continue
 
             for f in filenames:
@@ -42,10 +42,10 @@ class Compile(Command):
                         head, tail = os.path.split(head)
                     break
 
-        dirs = sorted(matches, key=len)  # A lexicographic sort would work as well,
-                                         # but sorting on the string length is more
-                                         # efficient as the length is cached and
-                                         # only integer comparisons are needed
+        # A lexicographic sort would work as well, but sorting on the
+        # string length is more efficient as the length is cached and
+        # only integer comparisons are needed
+        dirs = sorted(matches, key=len)
         dirs = (os.path.join(tempdir, d) for d in dirs)
         dirs = (os.path.realpath(d) for d in dirs)
 
@@ -88,10 +88,11 @@ class Watch(Compile):
 
     def parser(self):
         parser = self.parser_class()
-        parser.add_argument('-i', '--initial', help='Execute a build before entering the watching loop', action='store_true')
+        parser.add_argument('-i', '--initial',
+                help='Execute a build before entering the watching loop',
+                action='store_true')
 
         return parser
-
 
     def execute(self, args):
 
@@ -104,26 +105,26 @@ class Watch(Compile):
         dest = os.path.join(base, name + '.pdf')
 
         def handler(event):
-            relative = event.path[len(base)+1:]
+            relative = event.path[len(base) + 1:]
 
             if event.path.startswith(tempdir):
-                self.logger.debug('Ignoring \'{}\''.format(relative))
+                self.logger.debug('Ignoring {!r}'.format(relative))
                 return
 
             if event.path == dest:
-                self.logger.debug('Ignoring \'{}\''.format(relative))
+                self.logger.debug('Ignoring {!r}'.format(relative))
                 return
 
             if os.path.basename(event.path).startswith('.'):
-                self.logger.debug('Ignoring \'{}\''.format(relative))
+                self.logger.debug('Ignoring {!r}'.format(relative))
                 return
 
             if os.path.basename(event.path).endswith('~'):
-                self.logger.debug('Ignoring \'{}\''.format(relative))
+                self.logger.debug('Ignoring {!r}'.format(relative))
                 return
 
             if os.path.isdir(event.path):
-                self.logger.debug('Ignoring directory \'{}\''.format(relative))
+                self.logger.debug('Ignoring directory {!r}'.format(relative))
                 return
 
             if isinstance(event, monitor.base.FileCreated):
@@ -131,12 +132,13 @@ class Watch(Compile):
                     subdir = os.path.dirname(relative)
                     builddir = os.path.join(tempdir, subdir)
                     if not os.path.exists(builddir):
-                        # If a new .tex file was added ans the containing directory does not
-                        # exist in the build root, then create it
+                        # If a new .tex file was added and the containing
+                        # directory does not exist in the build root, create it
                         os.mkdir(builddir)
-                        self.logger.info("Added subdirectory {!r} to the build directory".format(subdir))
+                        self.logger.info("Added subdirectory {!r} to the " \
+                                "build directory".format(subdir))
 
-            self.logger.info('Change detected at \'{}\', recompiling...'.format(
+            self.logger.info('Change detected at {!r}, recompiling...'.format(
                 relative))
             self.compile(tempdir, dest)
 
@@ -168,10 +170,10 @@ class Clean(Command):
 
     def parser(self):
         parser = self.parser_class()
-        parser.add_argument('--all', '-a', action='store_const', const=True, default=False)
+        parser.add_argument('--all', '-a', action='store_const', const=True,
+                default=False)
 
         return parser
-
 
     def execute(self, args):
         tempdir = self.config.get('compilation', 'tempdir')

@@ -6,7 +6,6 @@ import pyinotify
 from operator import attrgetter
 
 
-
 class Stream(object):
 
     EVENT_MAPPINGS = {
@@ -51,7 +50,10 @@ class Observer(object):
 
     def monitor(self, path, callback):
         stream = Stream(callback)
-        mask = pyinotify.IN_CREATE | pyinotify.IN_MODIFY | pyinotify.IN_DELETE | pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO | pyinotify.IN_ACCESS | pyinotify.IN_ATTRIB
+        mask = 0
+        mask |= pyinotify.IN_CREATE | pyinotify.IN_MODIFY | pyinotify.IN_DELETE
+        mask |= pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO
+        mask |= pyinotify.IN_ACCESS | pyinotify.IN_ATTRIB
         self.vm.add_watch(path, mask, stream.handle_event, rec=True)
 
     def stop(self):

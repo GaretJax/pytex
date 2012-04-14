@@ -1,6 +1,7 @@
 from pytex.subcommands import Command
 
-import os, shutil
+import os
+import shutil
 
 
 class Init(Command):
@@ -25,16 +26,16 @@ class Init(Command):
 
         self.logger.info("Creating new pytex document at '{}'".format(path))
 
-        template_name = args.template or self.config.get('templates', 'default')
+        template = args.template or self.config.get('templates', 'default')
 
-        self.logger.info("Selected template '{}'".format(template_name))
+        self.logger.info("Selected template '{}'".format(template))
 
-        template = os.path.join(
+        template_dir = os.path.join(
             os.path.expanduser(self.config.get('templates', 'directory')),
-            template_name
+            template
         )
 
-        shutil.copytree(template, path)
+        shutil.copytree(template_dir, path)
 
         print base
 

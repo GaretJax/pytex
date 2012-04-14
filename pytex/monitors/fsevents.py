@@ -6,7 +6,6 @@ import fsevents
 from pytex.monitors import base
 
 
-
 class Stream(fsevents.Stream):
 
     EVENT_MAPPINGS = {

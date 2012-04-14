@@ -1,6 +1,7 @@
 from pytex.subcommands import Command
 
-import os, sys
+import os
+import sys
 
 
 class List(Command):

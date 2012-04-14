@@ -1,4 +1,6 @@
 import os
+import platform
+
 from setuptools import setup, find_packages
 
 
@@ -44,6 +46,13 @@ class Setup(object):
                     yield os.path.join(basedir, root, name)[rem:]
 
 
+if platform.system() == 'Darwin':
+    fs_monitor = 'macfsevents'
+elif platform.system() == 'Linux':
+    fs_monitor = 'pyinotify'
+else:
+    raise Exception("Only works on OS X and Linux")
+
 
 setup(
     name='pytex',
@@ -51,13 +60,14 @@ setup(
     description='Command line utility to ease working on LaTeX documents.',
     author='Jonathan Stoppani',
     author_email='jonathan@stoppani.name',
-    url='https://github.com/garetjax/python-latex',
-    download_url='https://github.com/garetjax/python-tex/tarball/0.1a',
+    url='https://github.com/garetjax/pytex',
+    download_url='https://github.com/garetjax/pytex/tarball/0.1a',
     license='MIT',
     packages=find_packages(),
+    package_dir = {'pytex': 'pytex'},
     package_data = {
-        #'dcs': list(get_files('dcs.schemata', 'dcs.fabfiles')),
+        'pytex': ['default-settings.ini'],#list(Setup.get_files('pytex.pytex')),
     },
-    install_requires=Setup.requirements('requirements.txt'),
+    install_requires=Setup.requirements('requirements.txt') + [fs_monitor],
     entry_points=Setup.read('entry-points.ini', True),
 )

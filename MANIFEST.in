@@ -1,0 +1,2 @@
+include entry-points.ini
+include requirements.txt

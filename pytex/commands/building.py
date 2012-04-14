@@ -20,11 +20,43 @@ class Compile(Command):
         name = os.path.basename(os.getcwd())
         dest = os.path.join(os.path.realpath('.'), name + '.pdf')
 
+        self.mktempdir(tempdir)
         self.compile(tempdir, dest)
 
     def compile(self, tempdir, dest):
+    def mktempdir(self, tempdir):
+        # Find every *.tex file in the source directory
+        # Recreate the dir tree under tempdir for the dirname of each found *.tex file
+        matches = set()
+
+        for root, dirnames, filenames in os.walk('.', topdown=False):
+            if root in matches:
+                # If a subdirectory of root was already scheduled for creation
+                # ignore root altogether
+                continue
+
+            for f in filenames:
+                if f.endswith('.tex'):
+                    head, tail = root, ''
+                    while head != '.':
+                        matches.add(head)
+                        head, tail = os.path.split(head)
+                    break
+
+        dirs = sorted(matches, key=len)  # A lexicographic sort would work as well,
+                                         # but sorting on the string length is more
+                                         # efficient as the length is cached and
+                                         # only integer comparisons are needed
+        dirs = (os.path.join(tempdir, d) for d in dirs)
+        dirs = (os.path.realpath(d) for d in dirs)
+
         if not os.path.exists(tempdir):
             os.mkdir(tempdir)
+        else:
+            dirs = (d for d in dirs if not os.path.exists(d))
+
+        for d in dirs:
+            os.mkdir(d)
 
         cmd = shlex.split(self.config.get('compilation', 'command'))
         cmd += [
@@ -68,6 +100,23 @@ class Watch(Compile):
 
             self.logger.info('Change detected at {}, recompiling...'.format(
                 event.path))
+            if os.path.isdir(event.path):
+                self.logger.debug('Ignoring directory \'{}\''.format(relative))
+                return
+
+            if isinstance(event, monitor.base.FileCreated):
+                if event.path.endswith('.tex'):
+                    subdir = os.path.dirname(relative)
+                    builddir = os.path.join(tempdir, subdir)
+                    if not os.path.exists(builddir):
+                        # If a new .tex file was added ans the containing directory does not
+                        # exist in the build root, then create it
+                        os.mkdir(builddir)
+                        self.logger.info("Added subdirectory {!r} to the build directory".format(subdir))
+
+
+        self.mktempdir(tempdir)
+
             self.compile(tempdir, dest)
 
         observer = monitor.Observer()

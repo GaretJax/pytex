@@ -65,7 +65,7 @@ class Observer(object):
         mask = 0
         mask |= pyinotify.IN_CREATE | pyinotify.IN_MODIFY | pyinotify.IN_DELETE
         mask |= pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO
-        mask |= pyinotify.IN_ACCESS | pyinotify.IN_ATTRIB
+        mask |= pyinotify.IN_ATTRIB
         self.vm.add_watch(path, mask, stream.handle_event, rec=True)
 
     def stop(self):

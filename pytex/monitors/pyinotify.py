@@ -9,6 +9,13 @@ from operator import attrgetter
 class Stream(object):
 
     EVENT_MAPPINGS = {
+# TODO: The following OP flags are not yet defined. Do we need them?
+#       pyinotify.IN_ACCESS        : 0x00000001,  # File was accessed
+#       pyinotify.IN_CLOSE_WRITE   : 0x00000008,  # Writable file was closed
+#       pyinotify.IN_CLOSE_NOWRITE : 0x00000010,  # Unwritable file closed
+#       pyinotify.IN_OPEN          : 0x00000020,  # File was opened
+#       pyinotify.IN_DELETE_SELF   : 0x00000400,  # Self (watched item itself) was deleted
+#       pyinotify.IN_MOVE_SELF     : 0x00000800,  # Self (watched item itself) was moved
         pyinotify.IN_ATTRIB: base.FileModified,
         pyinotify.IN_CREATE: base.FileCreated,
         pyinotify.IN_MODIFY: base.FileModified,
@@ -36,7 +43,12 @@ class Stream(object):
                 self.final_callback(self.EVENT_MAPPINGS[key](*paths))
         else:
             # Handle single event
-            self.final_callback(self.EVENT_MAPPINGS[event.mask](event.name))
+            try:
+                event_class = self.EVENT_MAPPINGS[event.mask]
+            except KeyError:
+                print 'Ignoring event with opflag {}'.format(event.mask)
+            else:
+                self.final_callback(event_class(event.name))
 
 
 class Observer(object):

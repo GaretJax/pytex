@@ -1,7 +1,5 @@
-pytex
-=====
-
-A command line tool to ease the redaction of latex documents.
+`pytex` -- *A command line tool to ease the redaction of LaTeX documents.*
+==========================================================================
 
 
 Installation
@@ -19,7 +17,7 @@ install the package manually:
     cd GaretJax-pytex-*
     python setup.py install
 
-Or exploit `pip` to install an editable copy locally:
+or exploit `pip` to install an editable copy locally:
 
     pip install -e git+https://github.com/GaretJax/pytex.git#egg=pytex
 

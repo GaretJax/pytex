@@ -1,7 +1,6 @@
 `pytex` -- *A command line tool to ease the redaction of LaTeX documents.*
 ==========================================================================
 
-
 Installation
 ------------
 

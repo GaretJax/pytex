@@ -107,6 +107,8 @@ class Watch(Compile):
         def handler(event):
             relative = event.path[len(base) + 1:]
 
+            self.logger.debug('Event received: {!r}'.format(event))
+
             if event.path.startswith(tempdir):
                 self.logger.debug('Ignoring {!r}'.format(relative))
                 return

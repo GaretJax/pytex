@@ -22,6 +22,7 @@ class FileMoved(FSEvent):
 
     def __init__(self, src, dst):
         self.src, self.dst = src, dst
+        self.path = dst
 
     def __repr__(self):
         return '{}({} -> {})'.format(

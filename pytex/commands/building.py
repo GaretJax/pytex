@@ -95,41 +95,42 @@ class Compile(Command):
     
     def compile_bibliography(self, tempdir):
         #Copy the bibliography to the build directory
-        bibliography = self.config.get('compilation', 'bibliography')
+        if self.config.has_option('compilation', 'bibliography'):
+            bibliography = self.config.get('compilation', 'bibliography')
+        else:
+            bibliography = 'bibliography'
+
         shutil.copyfile(bibliography + '.bib', os.path.join(tempdir, bibliography + '.bib'))
         
         cmd = ['bibtex', 'master'];
-
         return self.exec_command_sub(cmd, tempdir)
 
     def compile_index(self, tempdir):
-        cmd = shlex.split(self.config.get('compilation', 'index'))
-
-        #TODO Make it quiet as well
-        cmd += ['master']
-
+        cmd = ['makeindex', '-q', 'master']
         return self.exec_command_sub(cmd, tempdir)
 
     def compile_glossary(self, tempdir):
-        cmd = shlex.split(self.config.get('compilation', 'glossary'))
-
-        cmd += ['master']
-
+        cmd = ['makeglossaries', 'master']
         return self.exec_command_sub(cmd, tempdir)
 
     def compile(self, tempdir, dest):
+        if self.config.has_option('compilation', 'features'):
+            features = shlex.split(self.config.get('compilation', 'features'))
+        else:
+            features = []
+        
         status = self.compile_pdf(tempdir, dest, True)
 
         #Generate the bibliography if necessary
-        if status and self.config.has_option('compilation', 'bibliography'):
+        if status and 'bibliography' in features:
             status = self.compile_bibliography(tempdir)
 
         #Generate the index if necessary
-        if status and self.config.has_option('compilation', 'index'):
+        if status and 'index' in features:
             status = self.compile_index(tempdir)
 
         #Generate the glossary if necessary
-        if status and self.config.has_option('compilation', 'glossary'):
+        if status and 'glossary' in features:
             status = self.compile_glossary(tempdir)
 
         #Last draft to fix all the references

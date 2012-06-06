@@ -110,6 +110,13 @@ class Compile(Command):
 
         return self.exec_command_sub(cmd, tempdir)
 
+    def compile_glossary(self, tempdir):
+        cmd = shlex.split(self.config.get('compilation', 'glossary'))
+
+        cmd += ['master']
+
+        return self.exec_command_sub(cmd, tempdir)
+
     def compile(self, tempdir, dest):
         status = self.compile_pdf(tempdir, dest, True)
 
@@ -120,6 +127,10 @@ class Compile(Command):
         #Generate the index if necessary
         if status and self.config.has_option('compilation', 'index'):
             status = self.compile_index(tempdir)
+
+        #Generate the glossary if necessary
+        if status and self.config.has_option('compilation', 'glossary'):
+            status = self.compile_glossary(tempdir)
 
         #Last draft to fix all the references
         if status:

@@ -58,7 +58,12 @@ class Compile(Command):
             os.mkdir(d)
 
     def compile_pdf(self, tempdir, dest, draft):
-        cmd = shlex.split(self.config.get('compilation', 'command'))
+        #Choose the command based on the draft mode
+        if draft:
+            cmd = shlex.split(self.config.get('compilation', 'draft_command'))
+        else:
+            cmd = shlex.split(self.config.get('compilation', 'command'))
+            
         cmd += [
             '--output-directory', tempdir,
             '--file-line-error',
@@ -74,12 +79,19 @@ class Compile(Command):
         except subprocess.CalledProcessError as e:
             self.logger.error(e.output)
             self.logger.error(e)
+            return False
         else:
-            self.logger.info('Done')
-            shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
+            return True
 
     def compile(self, tempdir, dest):
-        self.compile_pdf(tempdir, dest, False)
+        status = self.compile_pdf(tempdir, dest, True)
+
+        if status:
+            status = self.compile_pdf(tempdir, dest, False)
+
+        if status:
+            self.logger.info('Done')
+            shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
         
 
 compile_command = Compile()

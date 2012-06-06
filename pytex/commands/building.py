@@ -57,6 +57,21 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
+
+    def exec_command(self, cmd):
+        self.logger.debug(' '.join(cmd))
+
+        try:
+            subprocess.check_output(cmd)
+            pass
+        except subprocess.CalledProcessError as e:
+            self.logger.error(e.output)
+            self.logger.error(e)
+            return False
+        else:
+            return True
+
+
     def compile_pdf(self, tempdir, dest, draft):
         #Choose the command based on the draft mode
         if draft:
@@ -71,17 +86,8 @@ class Compile(Command):
             'master.tex',
         ]
 
-        self.logger.debug(' '.join(cmd))
+        return self.exec_command(cmd)
 
-        try:
-            subprocess.check_output(cmd)
-            pass
-        except subprocess.CalledProcessError as e:
-            self.logger.error(e.output)
-            self.logger.error(e)
-            return False
-        else:
-            return True
     
     def compile_bibliography(self, tempdir):
         #Copy the bibliography to the build directory
@@ -92,20 +98,9 @@ class Compile(Command):
 
         old_cwd = os.getcwd()
         os.chdir(tempdir)
-
-        self.logger.debug(' '.join(cmd))
-
-        try:
-            subprocess.check_output(cmd)
-            pass
-        except subprocess.CalledProcessError as e:
-            self.logger.error(e.output)
-            self.logger.error(e)
-            os.chdir(old_cwd)
-            return False
-        else:
-            os.chdir(old_cwd)
-            return True
+        status = self.exec_command(cmd)
+        os.chdir(old_cwd)
+        return status
 
     def compile(self, tempdir, dest):
         status = self.compile_pdf(tempdir, dest, True)

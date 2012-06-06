@@ -82,9 +82,37 @@ class Compile(Command):
             return False
         else:
             return True
+    
+    def compile_bibliography(self, tempdir):
+        #Copy the bibliography to the build directory
+        bibliography = self.config.get('compilation', 'bibliography')
+        shutil.copyfile(bibliography + '.bib', os.path.join(tempdir, bibliography + '.bib'))
+        
+        cmd = ['bibtex', 'master'];
+
+        old_cwd = os.getcwd()
+        os.chdir(tempdir)
+
+        self.logger.debug(' '.join(cmd))
+
+        try:
+            subprocess.check_output(cmd)
+            pass
+        except subprocess.CalledProcessError as e:
+            self.logger.error(e.output)
+            self.logger.error(e)
+            os.chdir(old_cwd)
+            return False
+        else:
+            os.chdir(old_cwd)
+            return True
 
     def compile(self, tempdir, dest):
         status = self.compile_pdf(tempdir, dest, True)
+
+        #Generate the bibliography if necessary
+        if status and self.config.has_option('compilation', 'bibliography'):
+            status = self.compile_bibliography(tempdir)
 
         if status:
             status = self.compile_pdf(tempdir, dest, False)

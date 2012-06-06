@@ -57,7 +57,7 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
-    def compile(self, tempdir, dest):
+    def compile_pdf(self, tempdir, dest, draft):
         cmd = shlex.split(self.config.get('compilation', 'command'))
         cmd += [
             '--output-directory', tempdir,
@@ -78,6 +78,9 @@ class Compile(Command):
             self.logger.info('Done')
             shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
 
+    def compile(self, tempdir, dest):
+        self.compile_pdf(tempdir, dest, False)
+        
 
 compile_command = Compile()
 

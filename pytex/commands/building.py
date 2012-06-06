@@ -79,7 +79,7 @@ class Compile(Command):
 
     def compile_pdf(self, tempdir, dest, draft):
         #Choose the command based on the draft mode
-        if draft:
+        if draft and self.config.has_option('compilation', 'draft_command'):
             cmd = shlex.split(self.config.get('compilation', 'draft_command'))
         else:
             cmd = shlex.split(self.config.get('compilation', 'command'))

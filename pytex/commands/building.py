@@ -70,7 +70,7 @@ class Compile(Command):
         else:
             return True
     
-    def exec_command(self, cmd, directory):
+    def exec_command_sub(self, cmd, directory):
         old_cwd = os.getcwd()
         os.chdir(directory)
         status = self.exec_command(cmd)
@@ -100,7 +100,7 @@ class Compile(Command):
         
         cmd = ['bibtex', 'master'];
 
-        return self.command(self, cmd, tempdir)
+        return self.exec_command_sub(cmd, tempdir)
 
     def compile_index(self, tempdir):
         cmd = shlex.split(self.config.get('compilation', 'index'))
@@ -108,7 +108,7 @@ class Compile(Command):
         #TODO Make it quiet as well
         cmd += ['master']
 
-        return self.command(self, cmd, tempdir)
+        return self.exec_command_sub(cmd, tempdir)
 
     def compile(self, tempdir, dest):
         status = self.compile_pdf(tempdir, dest, True)

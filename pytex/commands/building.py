@@ -87,7 +87,6 @@ class Compile(Command):
         ]
 
         return self.exec_command(cmd)
-
     
     def compile_bibliography(self, tempdir):
         #Copy the bibliography to the build directory
@@ -102,12 +101,28 @@ class Compile(Command):
         os.chdir(old_cwd)
         return status
 
+    def compile_index(self, tempdir):
+        cmd = shlex.split(self.config.get('compilation', 'index'))
+
+        #TODO Make it quiet as well
+        cmd += ['master']
+
+        old_cwd = os.getcwd()
+        os.chdir(tempdir)
+        status = self.exec_command(cmd)
+        os.chdir(old_cwd)
+        return status
+
     def compile(self, tempdir, dest):
         status = self.compile_pdf(tempdir, dest, True)
 
         #Generate the bibliography if necessary
         if status and self.config.has_option('compilation', 'bibliography'):
             status = self.compile_bibliography(tempdir)
+
+        #Generate the index if necessary
+        if status and self.config.has_option('compilation', 'index'):
+            status = self.compile_index(tempdir)
 
         if status:
             status = self.compile_pdf(tempdir, dest, False)

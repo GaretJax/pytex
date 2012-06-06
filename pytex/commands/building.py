@@ -57,7 +57,6 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
-
     def exec_command(self, cmd):
         self.logger.debug(' '.join(cmd))
 
@@ -70,7 +69,13 @@ class Compile(Command):
             return False
         else:
             return True
-
+    
+    def exec_command(self, cmd, directory):
+        old_cwd = os.getcwd()
+        os.chdir(directory)
+        status = self.exec_command(cmd)
+        os.chdir(old_cwd)
+        return status
 
     def compile_pdf(self, tempdir, dest, draft):
         #Choose the command based on the draft mode
@@ -95,11 +100,7 @@ class Compile(Command):
         
         cmd = ['bibtex', 'master'];
 
-        old_cwd = os.getcwd()
-        os.chdir(tempdir)
-        status = self.exec_command(cmd)
-        os.chdir(old_cwd)
-        return status
+        return self.command(self, cmd, tempdir)
 
     def compile_index(self, tempdir):
         cmd = shlex.split(self.config.get('compilation', 'index'))
@@ -107,11 +108,7 @@ class Compile(Command):
         #TODO Make it quiet as well
         cmd += ['master']
 
-        old_cwd = os.getcwd()
-        os.chdir(tempdir)
-        status = self.exec_command(cmd)
-        os.chdir(old_cwd)
-        return status
+        return self.command(self, cmd, tempdir)
 
     def compile(self, tempdir, dest):
         status = self.compile_pdf(tempdir, dest, True)
@@ -124,6 +121,11 @@ class Compile(Command):
         if status and self.config.has_option('compilation', 'index'):
             status = self.compile_index(tempdir)
 
+        #Last draft to fix all the references
+        if status:
+            status = self.compile_pdf(tempdir, dest, True)
+
+        #Generate the final PDF
         if status:
             status = self.compile_pdf(tempdir, dest, False)
 

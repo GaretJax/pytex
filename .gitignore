@@ -4,3 +4,4 @@ pytex.log
 fabfile.py
 build/
 dist/
+*.pyc

@@ -57,15 +57,7 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
-    def compile(self, tempdir, dest):
-        cmd = shlex.split(self.config.get('compilation', 'command'))
-        cmd += [
-            '--output-directory', tempdir,
-            '--file-line-error',
-            '--interaction=nonstopmode',
-            'master.tex',
-        ]
-
+    def exec_command(self, cmd):
         self.logger.debug(' '.join(cmd))
 
         try:
@@ -74,10 +66,85 @@ class Compile(Command):
         except subprocess.CalledProcessError as e:
             self.logger.error(e.output)
             self.logger.error(e)
+            return False
         else:
+            return True
+    
+    def exec_command_sub(self, cmd, directory):
+        old_cwd = os.getcwd()
+        os.chdir(directory)
+        status = self.exec_command(cmd)
+        os.chdir(old_cwd)
+        return status
+
+    def compile_pdf(self, tempdir, dest, draft):
+        #Choose the command based on the draft mode
+        if draft and self.config.has_option('compilation', 'draft_command'):
+            cmd = shlex.split(self.config.get('compilation', 'draft_command'))
+        else:
+            cmd = shlex.split(self.config.get('compilation', 'command'))
+            
+        cmd += [
+            '--output-directory', tempdir,
+            '--file-line-error',
+            '--interaction=nonstopmode',
+            'master.tex',
+        ]
+
+        return self.exec_command(cmd)
+    
+    def compile_bibliography(self, tempdir):
+        #Copy the bibliography to the build directory
+        if self.config.has_option('compilation', 'bibliography'):
+            bibliography = self.config.get('compilation', 'bibliography')
+        else:
+            bibliography = 'bibliography'
+
+        shutil.copyfile(bibliography + '.bib', os.path.join(tempdir, bibliography + '.bib'))
+        
+        cmd = ['bibtex', 'master'];
+        return self.exec_command_sub(cmd, tempdir)
+
+    def compile_index(self, tempdir):
+        cmd = ['makeindex', '-q', 'master']
+        return self.exec_command_sub(cmd, tempdir)
+
+    def compile_glossary(self, tempdir):
+        cmd = ['makeglossaries', 'master']
+        return self.exec_command_sub(cmd, tempdir)
+
+    def compile(self, tempdir, dest):
+        if self.config.has_option('compilation', 'features'):
+            features = shlex.split(self.config.get('compilation', 'features'))
+        else:
+            features = []
+        
+        status = self.compile_pdf(tempdir, dest, True)
+
+        #Generate the bibliography if necessary
+        if status and 'bibliography' in features:
+            status = self.compile_bibliography(tempdir)
+
+        #Generate the index if necessary
+        if status and 'index' in features:
+            status = self.compile_index(tempdir)
+
+        #Generate the glossary if necessary
+        if status and 'glossary' in features:
+            status = self.compile_glossary(tempdir)
+
+        #Last draft to fix all the references
+        if status:
+            status = self.compile_pdf(tempdir, dest, True)
+
+        #Generate the final PDF
+        if status:
+            status = self.compile_pdf(tempdir, dest, False)
+
+        if status:
             self.logger.info('Done')
             shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
-
+        
 
 compile_command = Compile()
 

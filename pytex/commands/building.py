@@ -1,17 +1,18 @@
-from pytex.subcommands import Command
-
 import subprocess
 import os
+import glob
 import shlex
 import shutil
 import time
 
 from pytex.monitors import monitor
+from pytex.subcommands import Command
+from pytex.utils import find_files_of_type
 
 
 class Compile(Command):
 
-    name = "compile"
+    name = 'compile'
 
     def execute(self, args):
         tempdir = self.config.get('compilation', 'tempdir')
@@ -21,7 +22,21 @@ class Compile(Command):
         dest = os.path.join(os.path.realpath('.'), name + '.pdf')
 
         self.mktempdir(tempdir)
+
+        if args.bibtex:
+            self.logger.info('Compiling document with bibliography support')
+            self.compile(tempdir)
+            self.compile_bib(tempdir)
+            self.compile(tempdir)
+
         self.compile(tempdir, dest)
+
+    def parser(self):
+        parser = self.parser_class()
+        parser.add_argument('--bibtex', '-b', action='store_const', const=True,
+                default=False)
+
+        return parser
 
     def mktempdir(self, tempdir):
         # Find every *.tex file in the source directory to ecreate the dir
@@ -57,7 +72,32 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
-    def compile(self, tempdir, dest):
+    def compile_bib(self, tempdir):
+        base = os.path.realpath('.')
+
+        cmd = shlex.split(self.config.get('compilation', 'bibliography'))
+        cmd += [
+            'master.aux',
+        ]
+        self.logger.debug(' '.join(cmd))
+
+        try:
+            if tempdir.startswith(base):
+                exclude = tempdir[len(base) + 1:]
+            else:
+                exclude = tempdir
+            for f in find_files_of_type( os.path.realpath('.'), ('bib',), (exclude,)):
+                self.logger.debug('Copying bib {!r} file to build dir'.format(f))
+                shutil.copyfile(f, os.path.join(tempdir, f))
+            subprocess.check_output(cmd, cwd=tempdir)
+            pass
+        except subprocess.CalledProcessError as e:
+            self.logger.error(e.output)
+            self.logger.error(e)
+        else:
+            self.logger.info('Bibliography updated')
+
+    def compile(self, tempdir, dest=None, runs=1):
         cmd = shlex.split(self.config.get('compilation', 'command'))
         cmd += [
             '--output-directory', tempdir,
@@ -69,14 +109,17 @@ class Compile(Command):
         self.logger.debug(' '.join(cmd))
 
         try:
-            subprocess.check_output(cmd)
-            pass
+            for _ in range(runs):
+                subprocess.check_output(cmd)
         except subprocess.CalledProcessError as e:
             self.logger.error(e.output)
             self.logger.error(e)
         else:
-            self.logger.info('Done')
-            shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
+            if dest:
+                self.logger.info('Done')
+                shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
+            else:
+                self.logger.debug('Intermediary compilation done')
 
 
 compile_command = Compile()
@@ -109,6 +152,10 @@ class Watch(Compile):
 
             self.logger.debug('Event received: {!r}'.format(event))
 
+            if relative.startswith('.git/'):
+                self.logger.debug('Ignoring GIT action')
+                return
+
             if event.path.startswith(tempdir):
                 self.logger.debug('Ignoring {!r}'.format(relative))
                 return
@@ -140,9 +187,18 @@ class Watch(Compile):
                         self.logger.info("Added subdirectory {!r} to the " \
                                 "build directory".format(subdir))
 
-            self.logger.info('Change detected at {!r}, recompiling...'.format(
-                relative))
-            self.compile(tempdir, dest)
+            if event.path.endswith('.bib'):
+                self.logger.info('Change detected at {!r}, recompiling with bibliography support...'.format(
+                    relative))
+                self.compile(tempdir)
+                self.compile_bib(tempdir, relative)
+                self.compile(tempdir)
+                self.compile(tempdir, dest)
+                self.logger.info('All done')
+            else:
+                self.logger.info('Change detected at {!r}, recompiling...'.format(
+                    relative))
+                self.compile(tempdir, dest)
 
         self.mktempdir(tempdir)
 

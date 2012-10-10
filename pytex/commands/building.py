@@ -233,6 +233,13 @@ class Clean(Command):
 
         return parser
 
+    @staticmethod
+    def rmfile(file):
+        if os.path.exists(file):
+            os.remove(file)
+            return True
+        return False
+
     def execute(self, args):
         tempdir = self.config.get('compilation', 'tempdir')
         tempdir = os.path.realpath(tempdir)
@@ -241,12 +248,24 @@ class Clean(Command):
             self.logger.info('Deleting temp folder at {}'.format(tempdir))
             shutil.rmtree(tempdir)
 
+        if self.rmfile('hunSPELL.bak'):
+            self.logger.info('Deleted hunspell backup file')
+
+        if self.rmfile('pytex.log'):
+            self.logger.info('Deleted pytex log file')
+
         name = os.path.basename(os.getcwd())
         dest = os.path.join(os.path.realpath('.'), name + '.pdf')
 
-        if args.all and os.path.exists(dest):
-            self.logger.info('Deleting document at {}'.format(dest))
-            os.remove(dest)
+        if args.all:
+            if self.rmfile(dest):
+                self.logger.info('Deleted document at {}'.format(dest))
+
+            diffs = glob.glob('{}-diff-*-*.pdf'.format(name))
+            for diff in diffs:
+                self.rmfile(diff)
+                self.logger.info('Deleted diff document at {}'.format(diff))
+
 
         self.logger.info('Done')
 

@@ -9,6 +9,7 @@ from pytex.commands import building
 class Compare(Command):
 
     name = 'diff'
+    help = 'Creates a PDF document highligthing the changes between two tags in the repository.'
 
     def parser(self):
         parser = self.parser_class()

@@ -13,6 +13,7 @@ from pytex.utils import find_files_of_type
 class Compile(Command):
 
     name = 'compile'
+    help = 'Compile the LaTeX sources into a PDF document.'
 
     def execute(self, args):
         tempdir = self.config.get('compilation', 'tempdir')
@@ -128,6 +129,7 @@ compile_command = Compile()
 class Watch(Compile):
 
     name = 'watch'
+    help = 'Monitor the current directory for changes and rebuild the document when needed.'
 
     def parser(self):
         parser = self.parser_class()
@@ -225,6 +227,7 @@ watch_command = Watch()
 class Clean(Command):
 
     name = 'clean'
+    help = 'Clean the document by deleting all files resulted from the building process.'
 
     def parser(self):
         parser = self.parser_class()

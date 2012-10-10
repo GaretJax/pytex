@@ -44,6 +44,7 @@ class Init(Command):
         ver.ignore(
             '/build',
             '{}.pdf'.format(name),
+            '{}-diff-*.pdf'.format(name),
             'pytex.log',
         )
         ver.addall()

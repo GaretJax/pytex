@@ -9,6 +9,7 @@ import shlex
 class Save(Command):
 
     name = 'save'
+    help = 'Saves the current version of the document in a single commit.'
 
     def parser(self):
         parser = self.parser_class()
@@ -29,6 +30,7 @@ saving_command = Save()
 class Tag(Command):
 
     name = 'tag'
+    help = 'Creates a tagged version of the document out of the currently active commit.'
 
     def parser(self):
         parser = self.parser_class()

@@ -8,6 +8,8 @@ import importlib
 import itertools
 import argparse
 
+from pytex import versioning
+
 
 class Command(object):
     """
@@ -49,6 +51,18 @@ class Command(object):
 
     def set_config(self, config):
         self.config = config
+
+    def versions(self, path=None):
+        if not getattr(self, '_version_control', None):
+            self._version_control = {}
+
+        if path not in self._version_control:
+            self._version_control[path] = versioning.VersionControl(
+                self.logger,
+                path
+            )
+
+        return self._version_control[path]
 
     def parser(self):
         return self.parser_class()

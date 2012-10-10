@@ -18,9 +18,11 @@ class Init(Command):
 
     def execute(self, args):
         path = os.path.realpath(args.path)
-        base = os.path.dirname(path)
+        name = os.path.basename(path)
 
-        if os.path.exists(path):
+        if os.path.exists(path) and args.path != '.':
+            # Allow the creation of new documents in the current directory
+            # if explicitely requested
             print "The given name is already taken"
             return 1
 
@@ -37,7 +39,15 @@ class Init(Command):
 
         shutil.copytree(template_dir, path)
 
-        print base
+        ver = self.versions(path)
+        ver.init()
+        ver.ignore(
+            '/build',
+            '{}.pdf'.format(name),
+            'pytex.log',
+        )
+        ver.addall()
+        ver.commit('Initialized from template {!r}'.format(template))
 
 
 command = Init()

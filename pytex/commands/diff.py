@@ -59,6 +59,13 @@ class Compare(Command):
 
         # TODO: Is it correct to simply ignore files present in
         # the older version which aren't anymore in the new one?
+
+        ignore = (
+            'preamble.tex',
+            'languages/prompts.tex',
+            'headers-footers.tex',
+        )
+
         for root, _, files in os.walk(to_dir):
             relative_path = root[len(to_dir)+1:]
             for f in files:
@@ -71,13 +78,20 @@ class Compare(Command):
                     # If it does not exist, compare it against an
                     # empty file
                     if not os.path.exists(from_f):
+                        base = os.path.dirname(from_f)
+                        if not os.path.exists(base):
+                            os.makedirs(base)
                         open(from_f, 'w').close()
 
-                    out = subprocess.check_output([
-                        'latexdiff',
-                        '--e', 'utf8',
-                        from_f, to_f
-                    ])
+                    if relative in ignore:
+                        with open(to_f) as fh:
+                            out = fh.read()
+                    else:
+                        out = subprocess.check_output([
+                            'latexdiff',
+                            '--e', 'utf8',
+                            from_f, to_f
+                        ])
 
                     with open(diff_f, 'w') as fh:
                         fh.write(out)

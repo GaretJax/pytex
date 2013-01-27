@@ -1,5 +1,6 @@
 .virtualenv
 *.egg-info
+*.pyc
 pytex.log
 fabfile.py
 build/

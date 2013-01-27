@@ -1,5 +1,7 @@
 import os
+import re
 import pipes
+import dateutil.parser as dparser
 
 from pytex.versioning.base import VersionControlProvider
 
@@ -11,6 +13,37 @@ class Tag(object):
         self.versions = versions
         self.name = name
         self.message = message
+        self._date = None
+        self._tagger = None
+
+    @property
+    def date(self):
+        if not self._date:
+            self._get_details()
+        return self._date
+
+    @property
+    def tagger(self):
+        if not self._tagger:
+            self._get_details()
+        return self._tagger
+
+    def _get_details(self):
+        details = self.versions.runcmd('git', 'show', '-s', self.name)
+        details = re.sub(r'commit [0-9a-f]+.*', '', details, flags=re.DOTALL)
+        details, message = details.strip().split('\n\n', 1)
+        message = message.strip().split('\n', 1)[0].strip()
+
+        self._date = self._parse_date(details)
+        self._tagger = self._parse_tagger(details)
+
+    def _parse_date(self, details):
+        match = re.search('^Date:\s+(?P<date>.*)$', details, flags=re.MULTILINE)
+        return dparser.parse(match.group('date'))
+
+    def _parse_tagger(self, details):
+        match = re.search('^Tagger: (?P<tagger>[^<]+) <(?P<email>[^>]+)>$', details, flags=re.MULTILINE)
+        return match.group('tagger'), match.group('email')
 
     def __str__(self):
         return 'Tag: {}'.format(self.name)

@@ -15,6 +15,9 @@ class VersionControlProvider(object):
     def cdrootdir(self):
         curdir = rootdir = os.getcwd()
 
+        if self.path.startswith(rootdir):
+            curdir = rootdir = self.path
+
         while not self.isrootdir(rootdir):
             rootdir = os.path.dirname(rootdir)
 

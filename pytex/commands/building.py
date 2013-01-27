@@ -4,6 +4,7 @@ import glob
 import shlex
 import shutil
 import time
+import hashlib
 
 from pytex.monitors import monitor
 from pytex.subcommands import Command
@@ -24,17 +25,30 @@ class Compile(Command):
 
         self.mktempdir(tempdir)
 
-        if args.bibtex or args.glossary:
+        # TODO: Make a plugin architecture to allow additional actions
+        # to be run when compiling. This would allow to move the bibtex,
+        # glossary and nomenclature out of this class.
+
+        nomencl = self.get_nomencl_version(tempdir)
+
+        self.compile(tempdir)
+
+        nomencl = nomencl != self.get_nomencl_version(tempdir)
+
+        recompile = args.bibtex or args.glossary or nomencl
+
+        if recompile:
             support = []
             if args.bibtex:
                 support.append('bibliography')
             if args.glossary:
                 support.append('glossaries')
-            support = ' and '.join(support)
+            if nomencl:
+                support.append('nomenclature')
+
+            support = ' and '.join([', '.join(support[:-1]), support[-1]])
 
             self.logger.info('Compiling document with {} support'.format(support))
-
-            self.compile(tempdir)
 
             if args.bibtex:
                 self.compile_bib(tempdir)
@@ -42,9 +56,20 @@ class Compile(Command):
             if args.glossary:
                 self.compile_glossary(tempdir)
 
+            if nomencl:
+                self.compile_nomencl(tempdir)
+
+            self.compile(tempdir)
             self.compile(tempdir)
 
-        self.compile(tempdir, dest)
+        self.copy_pdf(tempdir, dest)
+
+    def get_nomencl_version(self, tempdir):
+        try:
+            with open(os.path.join(tempdir, 'master.nlo')) as fh:
+                return hashlib.sha256(fh.read()).hexdigest()
+        except IOError:
+            return None
 
     def parser(self):
         parser = self.parser_class()
@@ -88,6 +113,23 @@ class Compile(Command):
 
         for d in dirs:
             os.mkdir(d)
+
+    def compile_nomencl(self, tempdir):
+        cmd = shlex.split(self.config.get('compilation', 'nomenclature'))
+        cmd += [
+            '-o', 'master.nls',
+            'master.nlo',
+        ]
+        self.logger.debug(' '.join(cmd))
+
+        try:
+            subprocess.check_output(cmd, cwd=tempdir)
+            pass
+        except subprocess.CalledProcessError as e:
+            self.logger.error(e.output)
+            self.logger.error(e)
+        else:
+            self.logger.info('Nomenclature updated')
 
     def compile_glossary(self, tempdir):
         cmd = shlex.split(self.config.get('compilation', 'glossary'))
@@ -151,9 +193,12 @@ class Compile(Command):
         else:
             if dest:
                 self.logger.info('Done')
-                shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
+                self.copy_pdf(tempdir, dest)
             else:
                 self.logger.debug('Intermediary compilation done')
+
+    def copy_pdf(self, tempdir, dest):
+        shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
 
 
 compile_command = Compile()
@@ -241,7 +286,15 @@ class Watch(Compile):
             else:
                 self.logger.info('Change detected at {!r}, recompiling...'.format(
                     relative))
-                self.compile(tempdir, dest)
+                nomencl = self.get_nomencl_version(tempdir)
+                self.compile(tempdir)
+                if nomencl != self.get_nomencl_version(tempdir):
+                    self.logger.info('Detected nomenclature change, recompiling...')
+                    self.compile_nomencl(tempdir)
+                    self.compile(tempdir)
+                    self.compile(tempdir)
+                    self.logger.info('All done')
+                self.copy_pdf(tempdir, dest)
 
         self.mktempdir(tempdir)
 

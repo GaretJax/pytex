@@ -24,10 +24,24 @@ class Compile(Command):
 
         self.mktempdir(tempdir)
 
-        if args.bibtex:
-            self.logger.info('Compiling document with bibliography support')
+        if args.bibtex or args.glossary:
+            support = []
+            if args.bibtex:
+                support.append('bibliography')
+            if args.glossary:
+                support.append('glossaries')
+            support = ' and '.join(support)
+
+            self.logger.info('Compiling document with {} support'.format(support))
+
             self.compile(tempdir)
-            self.compile_bib(tempdir)
+
+            if args.bibtex:
+                self.compile_bib(tempdir)
+
+            if args.glossary:
+                self.compile_glossary(tempdir)
+
             self.compile(tempdir)
 
         self.compile(tempdir, dest)
@@ -35,6 +49,8 @@ class Compile(Command):
     def parser(self):
         parser = self.parser_class()
         parser.add_argument('--bibtex', '-b', action='store_const', const=True,
+                default=False)
+        parser.add_argument('--glossary', '-g', action='store_const', const=True,
                 default=False)
 
         return parser
@@ -73,6 +89,23 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
+    def compile_glossary(self, tempdir):
+        cmd = shlex.split(self.config.get('compilation', 'glossary'))
+        cmd += [
+            'master',
+        ]
+        self.logger.debug(' '.join(cmd))
+
+        try:
+            subprocess.check_output(cmd, cwd=tempdir)
+            pass
+        except subprocess.CalledProcessError as e:
+            self.logger.error(e.output)
+            self.logger.error(e)
+        else:
+            self.logger.info('Glossaries updated')
+
+
     def compile_bib(self, tempdir):
         base = os.path.realpath('.')
 
@@ -87,7 +120,7 @@ class Compile(Command):
                 exclude = tempdir[len(base) + 1:]
             else:
                 exclude = tempdir
-            for f in find_files_of_type( os.path.realpath('.'), ('bib',), (exclude,)):
+            for f in find_files_of_type(os.path.realpath('.'), ('bib',), (exclude,)):
                 self.logger.debug('Copying bib {!r} file to build dir'.format(f))
                 shutil.copyfile(f, os.path.join(tempdir, f))
             subprocess.check_output(cmd, cwd=tempdir)
@@ -193,7 +226,15 @@ class Watch(Compile):
                 self.logger.info('Change detected at {!r}, recompiling with bibliography support...'.format(
                     relative))
                 self.compile(tempdir)
-                self.compile_bib(tempdir, relative)
+                self.compile_bib(tempdir)
+                self.compile(tempdir)
+                self.compile(tempdir, dest)
+                self.logger.info('All done')
+            elif event.path.endswith('.gls'):
+                self.logger.info('Change detected at {!r}, recompiling with glossary support...'.format(
+                    relative))
+                self.compile(tempdir)
+                self.compile_glossary(tempdir)
                 self.compile(tempdir)
                 self.compile(tempdir, dest)
                 self.logger.info('All done')

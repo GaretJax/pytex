@@ -100,8 +100,12 @@ class LoggingSubsystem(object):
         # Configure logging
         file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - " \
                 "%(name)s - %(message)s (%(pathname)s:%(lineno)d)")
-        console_formatter = LevelColoringFormatter("%(levelname)10s: " \
-                "%(message)s")
+
+        if sys.__stdout__.isatty():
+            console_formatter = LevelColoringFormatter("%(levelname)10s: " \
+                    "%(message)s")
+        else:
+            console_formatter = logging.Formatter("%(message)s")
 
         # All console output not explicitly directed to the user should be
         # a log message instead

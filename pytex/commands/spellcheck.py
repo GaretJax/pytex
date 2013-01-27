@@ -9,7 +9,7 @@ from pytex.subcommands import Command
 
 class Spellcheck(Command):
 
-    name = 'spellcheck'
+    name = 'spellcheck', 'sp'
     help = 'Checks every LaTeX source file in the document for spelling errors.'
 
     def execute(self, args):

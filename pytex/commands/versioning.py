@@ -20,7 +20,7 @@ class Versions(Command):
         return parser
 
     def execute(self, args):
-        tags = self.versions().get_tags()
+        tags = reversed(self.versions().get_tags())
 
         if args.latex:
             self._latex(args, tags)

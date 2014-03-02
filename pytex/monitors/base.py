@@ -18,6 +18,9 @@ class FileDeleted(FSEvent):
     pass
 
 
+class AttributeChanged(FSEvent):
+    pass
+
 class FileMoved(FSEvent):
 
     def __init__(self, src, dst):

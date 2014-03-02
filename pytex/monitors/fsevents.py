@@ -9,6 +9,7 @@ from pytex.monitors import base
 class Stream(fsevents.Stream):
 
     EVENT_MAPPINGS = {
+        fsevents.IN_ATTRIB: base.AttributeChanged,
         fsevents.IN_CREATE: base.FileCreated,
         fsevents.IN_MODIFY: base.FileModified,
         fsevents.IN_DELETE: base.FileDeleted,

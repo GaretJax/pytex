@@ -1,2 +1,2 @@
-include entry-points.ini
-include requirements.txt
+include entry-points.ini requirements.txt
+include README.md NEWS.md

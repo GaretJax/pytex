@@ -5,6 +5,7 @@ import pyinotify
 
 from operator import attrgetter
 
+import os
 
 class Stream(object):
 
@@ -47,7 +48,7 @@ class Stream(object):
             except KeyError:
                 print 'Ignoring event with opflag {}'.format(event.mask)
             else:
-                self.final_callback(event_class(event.name))
+                self.final_callback(event_class(os.path.join(event.path, event.name)))
 
 
 class Observer(object):

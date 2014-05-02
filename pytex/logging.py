@@ -11,6 +11,21 @@ __all__ = [
 ]
 
 
+def hilite(string, color=None, bold=False, background=None):
+    attr = []
+
+    if color:
+        attr.append(str(color + 30))
+
+    if background:
+        attr.append(str(background + 40))
+
+    if bold:
+        attr.append('1')
+
+    return '\x1b[{0}m{1}\x1b[0m'.format(';'.join(attr), string)
+
+
 class LevelColoringFormatter(logging.Formatter):
     GRAY, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -22,20 +37,6 @@ class LevelColoringFormatter(logging.Formatter):
         50: RED,
     }
 
-    def hilite(self, string, color=None, bold=False, background=None):
-        attr = []
-
-        if color:
-            attr.append(str(color + 30))
-
-        if background:
-            attr.append(str(background + 40))
-
-        if bold:
-            attr.append('1')
-
-        return '\x1b[{0}m{1}\x1b[0m'.format(';'.join(attr), string)
-
     def format(self, record):
         s = super(LevelColoringFormatter, self).format(record)
         level = max(0, record.levelno)
@@ -44,7 +45,7 @@ class LevelColoringFormatter(logging.Formatter):
 
         color = LevelColoringFormatter.LEVELS_TO_COLORS[level]
         return s.replace(record.levelname,
-                self.hilite(record.levelname, color=color), 1)
+                hilite(record.levelname, color=color), 1)
 
 
 class StdioOnnaStick(object):

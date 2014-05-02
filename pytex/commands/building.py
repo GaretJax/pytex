@@ -31,13 +31,13 @@ class Compile(Command):
 
         nomencl = self.get_nomencl_version(tempdir)
 
-        self.compile(tempdir)
+        success = self.compile(tempdir)
 
         nomencl = nomencl != self.get_nomencl_version(tempdir)
 
         recompile = args.bibtex or args.glossary or nomencl
 
-        if recompile:
+        if success and recompile:
             support = []
             if args.bibtex:
                 support.append('bibliography')
@@ -60,9 +60,10 @@ class Compile(Command):
                 self.compile_nomencl(tempdir)
 
             self.compile(tempdir)
-            self.compile(tempdir)
+            success = self.compile(tempdir)
 
-        self.copy_pdf(tempdir, dest)
+        if success:
+            self.copy_pdf(tempdir, dest)
 
     def get_nomencl_version(self, tempdir):
         try:
@@ -190,12 +191,14 @@ class Compile(Command):
         except subprocess.CalledProcessError as e:
             self.logger.error(e.output)
             self.logger.error(e)
+            return False
         else:
             if dest:
                 self.logger.info('Done')
                 self.copy_pdf(tempdir, dest)
             else:
                 self.logger.debug('Intermediary compilation done')
+            return True
 
     def copy_pdf(self, tempdir, dest):
         shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
@@ -256,6 +259,10 @@ class Watch(Compile):
                 self.logger.debug('Ignoring directory {!r}'.format(relative))
                 return
 
+            if event.path.endswith('.log'):
+                self.logger.debug('Ignoring {!r}'.format(relative))
+                return
+
             if isinstance(event, monitor.base.FileCreated):
                 if event.path.endswith('.tex'):
                     subdir = os.path.dirname(relative)
@@ -287,14 +294,16 @@ class Watch(Compile):
                 self.logger.info('Change detected at {!r}, recompiling...'.format(
                     relative))
                 nomencl = self.get_nomencl_version(tempdir)
-                self.compile(tempdir)
-                if nomencl != self.get_nomencl_version(tempdir):
+                success = self.compile(tempdir)
+                if success and nomencl != self.get_nomencl_version(tempdir):
                     self.logger.info('Detected nomenclature change, recompiling...')
                     self.compile_nomencl(tempdir)
                     self.compile(tempdir)
-                    self.compile(tempdir)
+                    success = self.compile(tempdir)
                     self.logger.info('All done')
-                self.copy_pdf(tempdir, dest)
+
+                if success:
+                    self.copy_pdf(tempdir, dest)
 
         self.mktempdir(tempdir)
 

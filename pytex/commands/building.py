@@ -12,6 +12,7 @@ from pytex.utils import find_files_of_type
 
 import re
 
+
 class Compile(Command):
 
     name = 'compile'
@@ -36,7 +37,6 @@ class Compile(Command):
             dest = args.destination
         else:
             dest = os.path.join(os.path.realpath('.'), name + '.pdf')
-
 
         self.mktempdir(tempdir)
 
@@ -63,7 +63,8 @@ class Compile(Command):
 
             support = ' and '.join([', '.join(support[:-1]), support[-1]])
 
-            self.logger.info('Compiling document with {} support'.format(support))
+            self.logger.info('Compiling document with {} support'.format(
+                support))
 
             if args.bibtex:
                 self.compile_bib(tempdir, master)
@@ -90,9 +91,9 @@ class Compile(Command):
     def parser(self):
         parser = self.parser_class()
         parser.add_argument('--bibtex', '-b', action='store_const', const=True,
-                default=False)
-        parser.add_argument('--glossary', '-g', action='store_const', const=True,
-                default=False)
+                            default=False)
+        parser.add_argument('--glossary', '-g', action='store_const',
+                            const=True, default=False)
         parser.add_argument('--define', '-d', action='append')
         parser.add_argument('master', nargs='?', default='master')
         parser.add_argument('destination', nargs='?')
@@ -166,7 +167,6 @@ class Compile(Command):
         else:
             self.logger.info('Glossaries updated')
 
-
     def compile_bib(self, tempdir, master):
         base = os.path.realpath('.')
 
@@ -181,8 +181,10 @@ class Compile(Command):
                 exclude = tempdir[len(base) + 1:]
             else:
                 exclude = tempdir
-            for f in find_files_of_type(os.path.realpath('.'), ('bib',), (exclude,)):
-                self.logger.debug('Copying bib {!r} file to build dir'.format(f))
+            for f in find_files_of_type(os.path.realpath('.'),
+                                        ('bib',), (exclude,)):
+                self.logger.debug('Copying bib {!r} file to build dir'
+                                  .format(f))
                 shutil.copyfile(f, os.path.join(tempdir, f))
             subprocess.check_output(cmd, cwd=tempdir)
             pass
@@ -237,13 +239,16 @@ compile_command = Compile()
 class Watch(Compile):
 
     name = 'watch'
-    help = 'Monitor the current directory for changes and rebuild the document when needed.'
+    help = ('Monitor the current directory for changes and rebuild the '
+            'document when needed.')
 
     def parser(self):
         parser = self.parser_class()
-        parser.add_argument('-i', '--initial',
-                help='Execute a build before entering the watching loop',
-                action='store_true')
+        parser.add_argument(
+            '-i', '--initial',
+            help='Execute a build before entering the watching loop',
+            action='store_true'
+        )
         parser.add_argument('--define', '-d', action='append')
         parser.add_argument('master', nargs='?', default='master')
         parser.add_argument('destination', nargs='?')
@@ -286,7 +291,8 @@ class Watch(Compile):
                 return
 
             if ignore_regex_str and ignore_regex.search(relative):
-                self.logger.debug('Ignoring {!r} because of ignore regex from config'.format(relative))
+                self.logger.debug('Ignoring {!r} because of ignore regex '
+                                  'from config'.format(relative))
                 return
 
             if event.path.startswith(tempdir):
@@ -321,32 +327,34 @@ class Watch(Compile):
                         # If a new .tex file was added and the containing
                         # directory does not exist in the build root, create it
                         os.mkdir(builddir)
-                        self.logger.info("Added subdirectory {!r} to the " \
-                                "build directory".format(subdir))
+                        self.logger.info('Added subdirectory {!r} to the '
+                                         'build directory'.format(subdir))
 
             if event.path.endswith('.bib'):
-                self.logger.info('Change detected at {!r}, recompiling with bibliography support...'.format(
-                    relative))
+                self.logger.info('Change detected at {!r}, recompiling with '
+                                 'bibliography support...'.format(relative))
                 self.compile(tempdir, master, defs=defs)
                 self.compile_bib(tempdir, master)
                 self.compile(tempdir, master, defs=defs)
                 self.compile(tempdir, master, dest, defs=defs)
                 self.logger.info('All done')
             elif event.path.endswith('.gls'):
-                self.logger.info('Change detected at {!r}, recompiling with glossary support...'.format(
-                    relative))
+                self.logger.info('Change detected at {!r}, recompiling with '
+                                 'glossary support...'.format(relative))
                 self.compile(tempdir, master, defs=defs)
                 self.compile_glossary(tempdir, master, defs=defs)
                 self.compile(tempdir, master, defs=defs)
                 self.compile(tempdir, master, dest, defs=defs)
                 self.logger.info('All done')
             else:
-                self.logger.info('Change detected at {!r}, recompiling...'.format(
-                    relative))
+                self.logger.info('Change detected at {!r}, recompiling...'
+                                 .format(relative))
                 nomencl = self.get_nomencl_version(tempdir, master)
                 success = self.compile(tempdir, master, defs=defs)
-                if success and nomencl != self.get_nomencl_version(tempdir, master):
-                    self.logger.info('Detected nomenclature change, recompiling...')
+                if success and nomencl != self.get_nomencl_version(tempdir,
+                                                                   master):
+                    self.logger.info(
+                        'Detected nomenclature change, recompiling...')
                     self.compile_nomencl(tempdir, master)
                     self.compile(tempdir, master, defs=defs)
                     success = self.compile(tempdir, master, defs=defs)
@@ -380,12 +388,13 @@ watch_command = Watch()
 class Clean(Command):
 
     name = 'clean'
-    help = 'Clean the document by deleting all files resulted from the building process.'
+    help = ('Clean the document by deleting all files resulted from the '
+            'building process.')
 
     def parser(self):
         parser = self.parser_class()
         parser.add_argument('--all', '-a', action='store_const', const=True,
-                default=False)
+                            default=False)
 
         return parser
 
@@ -421,7 +430,6 @@ class Clean(Command):
             for diff in diffs:
                 self.rmfile(diff)
                 self.logger.info('Deleted diff document at {}'.format(diff))
-
 
         self.logger.info('Done')
 

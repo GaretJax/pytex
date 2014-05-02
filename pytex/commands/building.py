@@ -239,6 +239,10 @@ class Watch(Compile):
                 self.logger.debug('Ignoring GIT action')
                 return
 
+            if relative == '4913':
+                self.logger.debug('Ignoring vim temp file')
+                return
+
             if event.path.startswith(tempdir):
                 self.logger.debug('Ignoring {!r}'.format(relative))
                 return

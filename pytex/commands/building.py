@@ -20,8 +20,22 @@ class Compile(Command):
         tempdir = self.config.get('compilation', 'tempdir')
         tempdir = os.path.realpath(tempdir)
 
+        master = args.master
+
+        if args.define:
+            defs = [a.split('=', 1) for a in args.define]
+        else:
+            defs = []
+
         name = os.path.basename(os.getcwd())
-        dest = os.path.join(os.path.realpath('.'), name + '.pdf')
+        if master != 'master':
+            name = '{}-{}'.format(name, master)
+
+        if args.destination:
+            dest = args.destination
+        else:
+            dest = os.path.join(os.path.realpath('.'), name + '.pdf')
+
 
         self.mktempdir(tempdir)
 
@@ -29,11 +43,11 @@ class Compile(Command):
         # to be run when compiling. This would allow to move the bibtex,
         # glossary and nomenclature out of this class.
 
-        nomencl = self.get_nomencl_version(tempdir)
+        nomencl = self.get_nomencl_version(tempdir, master)
 
-        success = self.compile(tempdir)
+        success = self.compile(tempdir, master, defs=defs)
 
-        nomencl = nomencl != self.get_nomencl_version(tempdir)
+        nomencl = nomencl != self.get_nomencl_version(tempdir, master)
 
         recompile = args.bibtex or args.glossary or nomencl
 
@@ -51,23 +65,23 @@ class Compile(Command):
             self.logger.info('Compiling document with {} support'.format(support))
 
             if args.bibtex:
-                self.compile_bib(tempdir)
+                self.compile_bib(tempdir, master)
 
             if args.glossary:
-                self.compile_glossary(tempdir)
+                self.compile_glossary(tempdir, master)
 
             if nomencl:
-                self.compile_nomencl(tempdir)
+                self.compile_nomencl(tempdir, master)
 
-            self.compile(tempdir)
-            success = self.compile(tempdir)
+            self.compile(tempdir, master, defs=defs)
+            success = self.compile(tempdir, master, defs=defs)
 
         if success:
-            self.copy_pdf(tempdir, dest)
+            self.copy_pdf(tempdir, master, dest)
 
-    def get_nomencl_version(self, tempdir):
+    def get_nomencl_version(self, tempdir, master):
         try:
-            with open(os.path.join(tempdir, 'master.nlo')) as fh:
+            with open(os.path.join(tempdir, '{}.nlo'.format(master))) as fh:
                 return hashlib.sha256(fh.read()).hexdigest()
         except IOError:
             return None
@@ -78,6 +92,9 @@ class Compile(Command):
                 default=False)
         parser.add_argument('--glossary', '-g', action='store_const', const=True,
                 default=False)
+        parser.add_argument('--define', '-d', action='append')
+        parser.add_argument('master', nargs='?', default='master')
+        parser.add_argument('destination', nargs='?')
 
         return parser
 
@@ -115,11 +132,11 @@ class Compile(Command):
         for d in dirs:
             os.mkdir(d)
 
-    def compile_nomencl(self, tempdir):
+    def compile_nomencl(self, tempdir, master):
         cmd = shlex.split(self.config.get('compilation', 'nomenclature'))
         cmd += [
-            '-o', 'master.nls',
-            'master.nlo',
+            '-o', '{}.nls'.format(master),
+            '{}.nlo'.format(master),
         ]
         self.logger.debug(' '.join(cmd))
 
@@ -132,10 +149,10 @@ class Compile(Command):
         else:
             self.logger.info('Nomenclature updated')
 
-    def compile_glossary(self, tempdir):
+    def compile_glossary(self, tempdir, master):
         cmd = shlex.split(self.config.get('compilation', 'glossary'))
         cmd += [
-            'master',
+            master,
         ]
         self.logger.debug(' '.join(cmd))
 
@@ -149,12 +166,12 @@ class Compile(Command):
             self.logger.info('Glossaries updated')
 
 
-    def compile_bib(self, tempdir):
+    def compile_bib(self, tempdir, master):
         base = os.path.realpath('.')
 
         cmd = shlex.split(self.config.get('compilation', 'bibliography'))
         cmd += [
-            'master.aux',
+            '{}.aux'.format(master),
         ]
         self.logger.debug(' '.join(cmd))
 
@@ -174,14 +191,23 @@ class Compile(Command):
         else:
             self.logger.info('Bibliography updated')
 
-    def compile(self, tempdir, dest=None, runs=1):
+    def compile(self, tempdir, master, dest=None, runs=1, defs=None):
         cmd = shlex.split(self.config.get('compilation', 'command'))
         cmd += [
             '--output-directory', tempdir,
             '--file-line-error',
             '--interaction=nonstopmode',
-            'master.tex',
         ]
+
+        if defs:
+            defs = [r'\def\{}{{{}}}'.format(*a) for a in defs]
+            cmd += [
+                '{}\input{{master}}'.format(''.join(defs))
+            ]
+        else:
+            cmd += [
+                '{}.tex'.format(master),
+            ]
 
         self.logger.debug(' '.join(cmd))
 
@@ -195,13 +221,13 @@ class Compile(Command):
         else:
             if dest:
                 self.logger.info('Done')
-                self.copy_pdf(tempdir, dest)
+                self.copy_pdf(tempdir, master, dest)
             else:
                 self.logger.debug('Intermediary compilation done')
             return True
 
-    def copy_pdf(self, tempdir, dest):
-        shutil.copyfile(os.path.join(tempdir, 'master.pdf'), dest)
+    def copy_pdf(self, tempdir, master, dest):
+        shutil.copyfile(os.path.join(tempdir, '{}.pdf'.format(master)), dest)
 
 
 compile_command = Compile()
@@ -217,7 +243,9 @@ class Watch(Compile):
         parser.add_argument('-i', '--initial',
                 help='Execute a build before entering the watching loop',
                 action='store_true')
-
+        parser.add_argument('--define', '-d', action='append')
+        parser.add_argument('master', nargs='?', default='master')
+        parser.add_argument('destination', nargs='?')
         return parser
 
     def execute(self, args):
@@ -227,8 +255,21 @@ class Watch(Compile):
         tempdir = self.config.get('compilation', 'tempdir')
         tempdir = os.path.realpath(tempdir)
 
+        master = args.master
+
+        if args.define:
+            defs = [a.split('=', 1) for a in args.define]
+        else:
+            defs = []
+
         name = os.path.basename(os.getcwd())
-        dest = os.path.join(base, name + '.pdf')
+        if master != 'master':
+            name = '{}-{}'.format(name, master)
+
+        if args.destination:
+            dest = args.destination
+        else:
+            dest = os.path.join(os.path.realpath('.'), name + '.pdf')
 
         def handler(event):
             relative = event.path[len(base) + 1:]
@@ -277,39 +318,39 @@ class Watch(Compile):
             if event.path.endswith('.bib'):
                 self.logger.info('Change detected at {!r}, recompiling with bibliography support...'.format(
                     relative))
-                self.compile(tempdir)
-                self.compile_bib(tempdir)
-                self.compile(tempdir)
-                self.compile(tempdir, dest)
+                self.compile(tempdir, master, defs=defs)
+                self.compile_bib(tempdir, master)
+                self.compile(tempdir, master, defs=defs)
+                self.compile(tempdir, master, dest, defs=defs)
                 self.logger.info('All done')
             elif event.path.endswith('.gls'):
                 self.logger.info('Change detected at {!r}, recompiling with glossary support...'.format(
                     relative))
-                self.compile(tempdir)
-                self.compile_glossary(tempdir)
-                self.compile(tempdir)
-                self.compile(tempdir, dest)
+                self.compile(tempdir, master, defs=defs)
+                self.compile_glossary(tempdir, master, defs=defs)
+                self.compile(tempdir, master, defs=defs)
+                self.compile(tempdir, master, dest, defs=defs)
                 self.logger.info('All done')
             else:
                 self.logger.info('Change detected at {!r}, recompiling...'.format(
                     relative))
-                nomencl = self.get_nomencl_version(tempdir)
-                success = self.compile(tempdir)
-                if success and nomencl != self.get_nomencl_version(tempdir):
+                nomencl = self.get_nomencl_version(tempdir, master)
+                success = self.compile(tempdir, master, defs=defs)
+                if success and nomencl != self.get_nomencl_version(tempdir, master):
                     self.logger.info('Detected nomenclature change, recompiling...')
-                    self.compile_nomencl(tempdir)
-                    self.compile(tempdir)
-                    success = self.compile(tempdir)
+                    self.compile_nomencl(tempdir, master)
+                    self.compile(tempdir, master, defs=defs)
+                    success = self.compile(tempdir, master, defs=defs)
                     self.logger.info('All done')
 
                 if success:
-                    self.copy_pdf(tempdir, dest)
+                    self.copy_pdf(tempdir, master, dest)
 
         self.mktempdir(tempdir)
 
         if args.initial:
             self.logger.info('Compiling initial version...'.format(base))
-            self.compile(tempdir, dest)
+            self.compile(tempdir, master, dest, defs=defs)
 
         self.logger.info('Watching {} for changes...'.format(base))
 

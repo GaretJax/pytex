@@ -13,7 +13,6 @@ class Init(Command):
         parser = self.parser_class()
         parser.add_argument('path', metavar='NAME')
         parser.add_argument('-t', '--template', help='Template name to use')
-
         return parser
 
     def execute(self, args):

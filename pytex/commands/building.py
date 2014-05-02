@@ -10,6 +10,7 @@ from pytex.monitors import monitor
 from pytex.subcommands import Command
 from pytex.utils import find_files_of_type
 
+import re
 
 class Compile(Command):
 
@@ -227,6 +228,8 @@ class Watch(Compile):
         name = os.path.basename(os.getcwd())
         dest = os.path.join(base, name + '.pdf')
 
+        ignore_regex = self.config.get('watch', 'ignore')
+
         def handler(event):
             relative = event.path[len(base) + 1:]
 
@@ -234,6 +237,10 @@ class Watch(Compile):
 
             if relative.startswith('.git/'):
                 self.logger.debug('Ignoring GIT action')
+                return
+
+            if ignore_regex and re.search(ignore_regex, relative):
+                self.logger.debug('Ignoring {!r} because of ignore regex from config'.format(relative))
                 return
 
             if event.path.startswith(tempdir):

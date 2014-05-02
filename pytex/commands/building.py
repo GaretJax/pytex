@@ -228,7 +228,9 @@ class Watch(Compile):
         name = os.path.basename(os.getcwd())
         dest = os.path.join(base, name + '.pdf')
 
-        ignore_regex = self.config.get('watch', 'ignore')
+        ignore_regex_str = self.config.get('watch', 'ignore')
+        if ignore_regex_str:
+            ignore_regex = re.compile(ignore_regex_str)
 
         def handler(event):
             relative = event.path[len(base) + 1:]
@@ -239,7 +241,7 @@ class Watch(Compile):
                 self.logger.debug('Ignoring GIT action')
                 return
 
-            if ignore_regex and re.search(ignore_regex, relative):
+            if ignore_regex_str and ignore_regex.search(relative):
                 self.logger.debug('Ignoring {!r} because of ignore regex from config'.format(relative))
                 return
 

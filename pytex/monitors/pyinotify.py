@@ -20,10 +20,10 @@ class CoalescerThread(threading.Thread):
     }
 
     def __init__(self):
-        threading.Thread.__init__(self)
+        super(CoalescerThread, self).__init__()
         self.vm = pyinotify.WatchManager()
         self.notifier = pyinotify.Notifier(self.vm, timeout=100)
-        self.flag = False
+        self.stop_requested = False
 
     def monitor(self, path, callback):
         self.final_callback = callback
@@ -36,7 +36,7 @@ class CoalescerThread(threading.Thread):
         self.vm.add_watch(path, mask, self.handle_event, rec=True)
 
     def run(self):
-        while not self.flag:
+        while not self.stop_requested:
             # Process events
             self.notifier.process_events()
             while self.notifier.check_events():
@@ -69,13 +69,13 @@ class CoalescerThread(threading.Thread):
             try:
                 event_class = self.EVENT_MAPPINGS[event.mask]
             except KeyError:
-                print 'Ignoring event with opflag {}'.format(event.mask)
+                print 'Ignoring event with opstop_requested {}'.format(event.mask)
             else:
                 path = os.path.join(event.path, event.name)
                 self.event_buffer[path] += [event_class(path)]
 
     def stop(self):
-        self.flag = True
+        self.stop_requested = True
         self.join()
 
 

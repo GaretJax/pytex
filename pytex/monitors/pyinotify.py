@@ -22,7 +22,7 @@ class Observer(threading.Thread):
     def __init__(self):
         super(Observer, self).__init__()
         self.vm = pyinotify.WatchManager()
-        self.notifier = pyinotify.Notifier(self.vm, timeout=100)
+        self.notifier = pyinotify.Notifier(self.vm, timeout=10)
         self.stop_requested = False
 
     def monitor(self, path, callback):

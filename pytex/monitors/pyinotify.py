@@ -10,7 +10,7 @@ import threading
 from collections import defaultdict
 
 
-class CoalescerThread(threading.Thread):
+class Observer(threading.Thread):
     EVENT_MAPPINGS = {
         pyinotify.IN_ATTRIB: base.FileModified,
         pyinotify.IN_CREATE: base.FileCreated,
@@ -20,7 +20,7 @@ class CoalescerThread(threading.Thread):
     }
 
     def __init__(self):
-        super(CoalescerThread, self).__init__()
+        super(Observer, self).__init__()
         self.vm = pyinotify.WatchManager()
         self.notifier = pyinotify.Notifier(self.vm, timeout=100)
         self.stop_requested = False
@@ -69,7 +69,7 @@ class CoalescerThread(threading.Thread):
             try:
                 event_class = self.EVENT_MAPPINGS[event.mask]
             except KeyError:
-                print 'Ignoring event with opstop_requested {}'.format(event.mask)
+                print 'Ignoring event with opflag {}'.format(event.mask)
             else:
                 path = os.path.join(event.path, event.name)
                 self.event_buffer[path] += [event_class(path)]
@@ -77,17 +77,3 @@ class CoalescerThread(threading.Thread):
     def stop(self):
         self.stop_requested = True
         self.join()
-
-
-class Observer(object):
-    def __init__(self):
-        self.coalescer = CoalescerThread()
-
-    def start(self):
-        self.coalescer.start()
-
-    def monitor(self, path, callback):
-        self.coalescer.monitor(path, callback)
-
-    def stop(self):
-        self.coalescer.stop()

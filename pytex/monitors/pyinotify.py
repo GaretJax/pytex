@@ -3,11 +3,14 @@ from __future__ import absolute_import
 from pytex.monitors import base
 import pyinotify
 
+from operator import attrgetter
+
 import os
 import threading
 from collections import defaultdict
 
-class CoalescerThread (threading.Thread):
+
+class CoalescerThread(threading.Thread):
     EVENT_MAPPINGS = {
         pyinotify.IN_ATTRIB: base.FileModified,
         pyinotify.IN_CREATE: base.FileCreated,
@@ -41,7 +44,7 @@ class CoalescerThread (threading.Thread):
                 self.notifier.process_events()
 
             # Send callbacks for the last item of each event
-            for k,v in self.event_buffer.iteritems():
+            for k, v in self.event_buffer.iteritems():
                 self.final_callback(v[-1])
 
             self.event_buffer.clear()
@@ -68,11 +71,13 @@ class CoalescerThread (threading.Thread):
             except KeyError:
                 print 'Ignoring event with opflag {}'.format(event.mask)
             else:
-                self.event_buffer[os.path.join(event.path, event.name)] += [event_class(os.path.join(event.path, event.name))]
+                path = os.path.join(event.path, event.name)
+                self.event_buffer[path] += [event_class(path)]
 
     def stop(self):
         self.flag = True
         self.join()
+
 
 class Observer(object):
     def __init__(self):

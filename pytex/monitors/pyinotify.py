@@ -5,7 +5,7 @@ import pyinotify
 
 from operator import attrgetter
 
-import os
+from os.path import join
 import threading
 from collections import defaultdict
 
@@ -60,10 +60,19 @@ class Observer(threading.Thread):
             elif len(events) == 2:
                 # Handle multiple events
                 events.sort(key=attrgetter('mask'))
-                events = [(e.mask, e.path) for e in events]
+                events = [(e.mask, join(e.path, e.name)) for e in events]
                 key, paths = zip(*events)
-                for e in self.EVENT_MAPPINGS[key](*paths):
-                    self.event_buffer[e.path] += [e]
+
+                source = paths[0]
+                target = paths[1]
+
+                # Move the events of the moved file
+                if source in self.event_buffer:
+                    self.event_buffer[target] += self.event_buffer[source]
+                    del self.event_buffer[source]
+
+                self.event_buffer[target] += [self.EVENT_MAPPINGS[key](*paths)]
+
         else:
             # Handle single event
             try:
@@ -71,7 +80,7 @@ class Observer(threading.Thread):
             except KeyError:
                 print 'Ignoring event with opflag {}'.format(event.mask)
             else:
-                path = os.path.join(event.path, event.name)
+                path = join(event.path, event.name)
                 self.event_buffer[path] += [event_class(path)]
 
     def stop(self):

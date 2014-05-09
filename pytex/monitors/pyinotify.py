@@ -62,8 +62,7 @@ class Observer(threading.Thread):
                 events.sort(key=attrgetter('mask'))
                 events = [(e.mask, e.path) for e in events]
                 key, paths = zip(*events)
-                for e in self.EVENT_MAPPINGS[key](*paths):
-                    self.event_buffer[e.path] += [e]
+                self.event_buffer[e.path] += [self.EVENT_MAPPINGS[key](*paths)]
         else:
             # Handle single event
             try:

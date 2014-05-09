@@ -56,7 +56,7 @@ class Save(Command):
         message = args.message
 
         if not message:
-            message = 'Savepoint without message'
+            message = self.config.get('versioning', 'commitmessage')
 
         self.versions().addall().commit(message)
 

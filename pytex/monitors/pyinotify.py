@@ -5,7 +5,7 @@ import pyinotify
 
 from operator import attrgetter
 
-import os
+from os.path import join
 import threading
 from collections import defaultdict
 
@@ -50,8 +50,6 @@ class Observer(threading.Thread):
             self.event_buffer.clear()
 
     def handle_event(self, event):
-        path = os.path
-
         if hasattr(event, 'cookie'):
             events = self.linked_events.setdefault(event.cookie, [])
             events.append(event)
@@ -62,14 +60,14 @@ class Observer(threading.Thread):
             elif len(events) == 2:
                 # Handle multiple events
                 events.sort(key=attrgetter('mask'))
-                events = [(e.mask, path.join(e.path, e.name)) for e in events]
+                events = [(e.mask, join(e.path, e.name)) for e in events]
                 key, paths = zip(*events)
 
                 source = paths[0]
                 target = paths[1]
 
                 # Move the events of the moved file
-                if self.event_buffer.has_key(source):
+                if source in self.event_buffer:
                     self.event_buffer[target] += self.event_buffer[source]
                     del self.event_buffer[source]
 
@@ -82,7 +80,7 @@ class Observer(threading.Thread):
             except KeyError:
                 print 'Ignoring event with opflag {}'.format(event.mask)
             else:
-                path = path.join(event.path, event.name)
+                path = join(event.path, event.name)
                 self.event_buffer[path] += [event_class(path)]
 
     def stop(self):

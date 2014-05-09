@@ -50,6 +50,8 @@ class Observer(threading.Thread):
             self.event_buffer.clear()
 
     def handle_event(self, event):
+        path = os.path
+
         if hasattr(event, 'cookie'):
             events = self.linked_events.setdefault(event.cookie, [])
             events.append(event)
@@ -60,7 +62,7 @@ class Observer(threading.Thread):
             elif len(events) == 2:
                 # Handle multiple events
                 events.sort(key=attrgetter('mask'))
-                events = [(e.mask, e.path) for e in events]
+                events = [(e.mask, path.join(e.path, e.name)) for e in events]
                 key, paths = zip(*events)
                 self.event_buffer[paths[0]] += [self.EVENT_MAPPINGS[key](*paths)]
         else:
@@ -70,7 +72,7 @@ class Observer(threading.Thread):
             except KeyError:
                 print 'Ignoring event with opflag {}'.format(event.mask)
             else:
-                path = os.path.join(event.path, event.name)
+                path = path.join(event.path, event.name)
                 self.event_buffer[path] += [event_class(path)]
 
     def stop(self):

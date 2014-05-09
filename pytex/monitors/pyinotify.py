@@ -64,7 +64,17 @@ class Observer(threading.Thread):
                 events.sort(key=attrgetter('mask'))
                 events = [(e.mask, path.join(e.path, e.name)) for e in events]
                 key, paths = zip(*events)
-                self.event_buffer[paths[0]] += [self.EVENT_MAPPINGS[key](*paths)]
+
+                source = paths[0]
+                target = paths[1]
+
+                # Move the events of the moved file
+                if self.event_buffer.has_key(source):
+                    self.event_buffer[target] += self.event_buffer[source]
+                    del self.event_buffer[source]
+
+                self.event_buffer[target] += [self.EVENT_MAPPINGS[key](*paths)]
+
         else:
             # Handle single event
             try:

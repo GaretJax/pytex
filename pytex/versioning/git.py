@@ -78,6 +78,18 @@ class VersionControl(VersionControlProvider):
 
         return self
 
+    def pull(self):
+        self.runcmd('git', 'pull')
+        self.logger.info('Pulled from remote')
+
+        return self
+
+    def push(self):
+        self.runcmd('git', 'push')
+        self.logger.info('Pushed to remote')
+
+        return self
+
     def tag(self, name, message):
         self.runcmd('git', 'tag', '-a', name, '-m', message)
         self.logger.info('Tag {!r} created'.format(name))

@@ -63,6 +63,32 @@ class Save(Command):
 saving_command = Save()
 
 
+class Sync(Command):
+
+    name = 'sync'
+    help = 'Synchronize the directory with the remote directory (commit -> pull -> push)'
+
+    def parser(self):
+        parser = self.parser_class()
+        parser.add_argument('-m', '--message')
+        return parser
+
+    def execute(self, args):
+        message = args.message
+
+        if not message:
+            message = self.config.get('versioning', 'commitmessage')
+
+        self.versions().addall().commit(message)
+
+        self.versions().addall().pull();
+        self.versions().addall().push();
+
+        #TODO
+
+sync_command = Sync()
+
+
 class Tag(Command):
 
     name = 'tag'

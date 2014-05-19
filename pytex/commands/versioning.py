@@ -14,9 +14,9 @@ class Versions(Command):
         parser = self.parser_class()
         parser.add_argument('-c', '--current')
         parser.add_argument('-l', '--latex', action='store_const',
-                const=True, default=False)
+                            const=True, default=False)
         parser.add_argument('-f', '--format',
-                default='{0.name} - {0.tagger[0]} | "{0.message}"')
+                            default='{0.name} - {0.tagger[0]} | "{0.message}"')
         return parser
 
     def execute(self, args):
@@ -73,7 +73,7 @@ class Pull(Command):
         return parser
 
     def execute(self, args):
-        self.versions().addall().pull();
+        self.versions().addall().pull()
 
 pull_command = Pull()
 
@@ -88,7 +88,7 @@ class Push(Command):
         return parser
 
     def execute(self, args):
-        self.versions().addall().push();
+        self.versions().addall().push()
 
 push_command = Push()
 
@@ -96,7 +96,7 @@ push_command = Push()
 class Sync(Command):
 
     name = 'sync'
-    help = 'Synchronize the directory with the remote directory (commit -> pull -> push)'
+    help = 'Synchronize with the remote directory (commit -> pull -> push)'
 
     def parser(self):
         parser = self.parser_class()
@@ -111,8 +111,8 @@ class Sync(Command):
 
         self.versions().addall().commit(message)
 
-        self.versions().addall().pull();
-        self.versions().addall().push();
+        self.versions().addall().pull()
+        self.versions().addall().push()
 
 sync_command = Sync()
 
@@ -120,7 +120,8 @@ sync_command = Sync()
 class Tag(Command):
 
     name = 'tag'
-    help = 'Creates a tagged version of the document out of the currently active commit.'
+    help = ('Creates a tagged version of the document',
+            'out of the currently active commit.')
 
     def parser(self):
         parser = self.parser_class()

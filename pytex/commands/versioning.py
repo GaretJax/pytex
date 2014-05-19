@@ -63,6 +63,36 @@ class Save(Command):
 saving_command = Save()
 
 
+class Pull(Command):
+
+    name = 'pull'
+    help = 'Pull changes from remote repository'
+
+    def parser(self):
+        parser = self.parser_class()
+        return parser
+
+    def execute(self, args):
+        self.versions().addall().pull();
+
+pull_command = Pull()
+
+
+class Push(Command):
+
+    name = 'push'
+    help = 'Push changes to remote repository'
+
+    def parser(self):
+        parser = self.parser_class()
+        return parser
+
+    def execute(self, args):
+        self.versions().addall().push();
+
+push_command = Push()
+
+
 class Sync(Command):
 
     name = 'sync'
@@ -83,8 +113,6 @@ class Sync(Command):
 
         self.versions().addall().pull();
         self.versions().addall().push();
-
-        #TODO
 
 sync_command = Sync()
 

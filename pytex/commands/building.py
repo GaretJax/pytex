@@ -172,7 +172,7 @@ class Compile(Command):
 
         cmd = shlex.split(self.config.get('compilation', 'bibliography'))
         cmd += [
-            '{}.aux'.format(master),
+            '{}'.format(master),
         ]
         self.logger.debug(' '.join(cmd))
 

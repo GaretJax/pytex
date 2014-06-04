@@ -8,7 +8,8 @@ def is_sublist(sublist, superlist):
     return False
 
 
-def find_files_of_type(basedir, extensions, exclude_dirs=None, exclude_files=None):
+def find_files_of_type(basedir, extensions, exclude_dirs=None,
+                       exclude_files=None):
     matches = set()
 
     if isinstance(extensions, basestring):

@@ -14,9 +14,9 @@ class Versions(Command):
         parser = self.parser_class()
         parser.add_argument('-c', '--current')
         parser.add_argument('-l', '--latex', action='store_const',
-                const=True, default=False)
+                            const=True, default=False)
         parser.add_argument('-f', '--format',
-                default='{0.name} - {0.tagger[0]} | "{0.message}"')
+                            default='{0.name} - {0.tagger[0]} | "{0.message}"')
         return parser
 
     def execute(self, args):
@@ -66,7 +66,8 @@ saving_command = Save()
 class Tag(Command):
 
     name = 'tag'
-    help = 'Creates a tagged version of the document out of the currently active commit.'
+    help = 'Creates a tagged version of the document'\
+           'out of the currently active commit.'
 
     def parser(self):
         parser = self.parser_class()

@@ -52,7 +52,7 @@ class Compile(Command):
             for root, dirs, files in os.walk(os.path.realpath('.')):
                 for file in files:
                     if file.endswith(".rst.tex"):
-                        source= os.path.join(root, file)
+                        source = os.path.join(root, file)
                         target = source.replace(".rst.tex", ".tex")
 
                         self.logger.debug('Preprocess (Rst) {} -> {}'.format(

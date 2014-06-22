@@ -8,9 +8,11 @@ List = namedtuple("List", "depth type")
 
 test = Processor()
 
+
 class RstProcessor(Processor):
     list_stack = []
 
+    # print a line to the target file
     def print_line(self, line):
         self.f.write(line)
         self.f.write(os.linesep)
@@ -24,7 +26,6 @@ class RstProcessor(Processor):
         elif type == 2:
             self.print_line("\\begin{enumerate}")
 
-
     # end the previous list
     def end_list(self):
         prev = self.list_stack[-1]
@@ -35,7 +36,6 @@ class RstProcessor(Processor):
             self.print_line("\\end{enumerate}")
 
         self.list_stack.pop()
-
 
     # Handle a list item
     def handle_item(self, depth, type):
@@ -78,7 +78,6 @@ class RstProcessor(Processor):
         else:
             self.start_list(depth, type)
 
-
     # Handle lists
     def handle_lists(self, line):
         stripped = line.lstrip()
@@ -103,7 +102,7 @@ class RstProcessor(Processor):
 
             return line
 
-
+    # Handle some ReST style
     def handle_style(self, line, rst, latex):
         first_index = line.find(rst)
 
@@ -124,18 +123,15 @@ class RstProcessor(Processor):
 
         return line
 
-
     # Handle bold
     def handle_bold(self, line):
         return self.handle_style(line, "**", "textbf")
-
 
     # Handle emphasis
     def handle_emphasis(self, line):
         return self.handle_style(line, "*", "textit")
 
-
-    # Process a single line 
+    # Process a single line
     def process_line(self, line):
         # Handle lists
         processed = self.handle_lists(line)

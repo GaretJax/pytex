@@ -7,5 +7,3 @@ class Processor(object):
             self.process_line(line)
 
         self.f.close()
-
-

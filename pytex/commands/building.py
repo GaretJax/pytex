@@ -10,6 +10,8 @@ from pytex.monitors import monitor
 from pytex.subcommands import Command
 from pytex.utils import find_files_of_type
 
+from pytex.processors import RstProcessor
+
 import re
 
 
@@ -42,7 +44,23 @@ class Compile(Command):
 
         # TODO: Make a plugin architecture to allow additional actions
         # to be run when compiling. This would allow to move the bibtex,
-        # glossary and nomenclature out of this class.
+        # glossary, nomenclature and preprocessor out of this class.
+
+        preprocessor = self.config.get('compilation', 'preprocessor')
+
+        if preprocessor == 'rst':
+            for root, dirs, files in os.walk(os.path.realpath('.')):
+                for file in files:
+                    if file.endswith(".rst.tex"):
+                        source= os.path.join(root, file)
+                        target = source.replace(".rst.tex", ".tex")
+
+                        self.logger.debug('Preprocess (Rst) {} -> {}'.format(
+                            source, target))
+
+                        processor = RstProcessor()
+
+                        processor.process_file(source, target)
 
         nomencl = self.get_nomencl_version(tempdir, master)
 

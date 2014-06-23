@@ -14,11 +14,11 @@ class RstProcessor(Transformer):
 
     # Indicates if the processor wants to proces the given file or not
     def wants(self, source):
-        return source.endswith('.rst.tex')
+        return source.endswith('.tex.rst')
 
     # Get the target file name
     def target(self, source):
-        return source.replace('.rst.tex', '.tex')
+        return source.replace('.tex.rst', '.tex')
 
     def end(self):
         if self.list_stack:

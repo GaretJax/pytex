@@ -44,11 +44,11 @@ class Compile(Command):
 
         # TODO: Make a plugin architecture to allow additional actions
         # to be run when compiling. This would allow to move the bibtex,
-        # glossary, nomenclature and preprocessor out of this class.
+        # glossary, nomenclature and preprocessors out of this class.
 
-        preprocessor = self.config.get('compilation', 'preprocessor')
+        processors = self.config.get('compilation', 'preprocessors').split(',')
 
-        if preprocessor == 'rst':
+        if 'rst' in processors:
             for root, dirs, files in os.walk(os.path.realpath('.')):
                 for file in files:
                     if file.endswith(".rst.tex"):

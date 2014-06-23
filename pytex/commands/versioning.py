@@ -73,7 +73,7 @@ class Pull(Command):
         return parser
 
     def execute(self, args):
-        self.versions().addall().pull()
+        self.versions().pull()
 
 pull_command = Pull()
 
@@ -88,7 +88,7 @@ class Push(Command):
         return parser
 
     def execute(self, args):
-        self.versions().addall().push()
+        self.versions().push()
 
 push_command = Push()
 
@@ -111,8 +111,8 @@ class Sync(Command):
 
         self.versions().addall().commit(message)
 
-        self.versions().addall().pull()
-        self.versions().addall().push()
+        self.versions().pull()
+        self.versions().push()
 
 sync_command = Sync()
 

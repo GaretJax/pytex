@@ -2,15 +2,27 @@ import os
 
 from collections import namedtuple
 
-from base import Processor
+from base import Transformer
 
 List = namedtuple("List", "depth type")
 
-test = Processor()
 
-
-class RstProcessor(Processor):
+class RstProcessor(Transformer):
     list_stack = []
+
+    name = "RestructuredText processor"
+
+    # Indicates if the processor wants to proces the given file or not
+    def wants(self, source):
+        return source.endswith('.rst.tex')
+
+    # Get the target file name
+    def target(self, source):
+        return source.replace('.rst.tex', '.tex')
+
+    def end(self):
+        if self.list_stack:
+            self.logger.error("Something went wrong in list handling")
 
     # print a line to the target file
     def print_line(self, line):

@@ -21,6 +21,7 @@ class FileDeleted(FSEvent):
 class AttributeChanged(FSEvent):
     pass
 
+
 class FileMoved(FSEvent):
 
     def __init__(self, src, dst):
@@ -29,7 +30,7 @@ class FileMoved(FSEvent):
 
     def __repr__(self):
         return '{}({} -> {})'.format(
-                self.__class__.__name__, self.src, self.dst)
+            self.__class__.__name__, self.src, self.dst)
 
 
 class FileCopied(FSEvent):

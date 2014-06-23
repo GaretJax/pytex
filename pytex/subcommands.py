@@ -23,7 +23,8 @@ class Command(object):
         names = getattr(self, 'name', None)
 
         if not names:
-            raise ValueError('No name defined for command {}'.format(self.__class__.__name__))
+            raise ValueError('No name defined for command {}'
+                             .format(self.__class__.__name__))
 
         if not isinstance(names, basestring):
             names = names[0]
@@ -34,7 +35,8 @@ class Command(object):
         names = getattr(self, 'name', None)
 
         if not names:
-            raise ValueError('No name defined for command {}'.format(self.__class__.__name__))
+            raise ValueError('No name defined for command {}'
+                             .format(self.__class__.__name__))
 
         if isinstance(names, basestring):
             names = [names]

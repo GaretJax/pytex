@@ -10,7 +10,7 @@ from pytex.subcommands import Command
 class Spellcheck(Command):
 
     name = 'spellcheck', 'sp'
-    help = 'Checks every LaTeX source file in the document for spelling errors.'
+    help = 'Spell checks each LaTeX source file in the document.'
 
     def execute(self, args):
         base = os.path.realpath('.')
@@ -27,7 +27,6 @@ class Spellcheck(Command):
                 break
         else:
             self.logger.info('Done')
-
 
     def spellcheck_file(self, file):
         base = os.path.realpath('.')

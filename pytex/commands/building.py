@@ -11,7 +11,6 @@ from pytex.subcommands import Command
 from pytex.utils import find_files_of_type
 
 from pytex.processors import loadprocessors
-from pytex.processors import RstProcessor
 
 import re
 

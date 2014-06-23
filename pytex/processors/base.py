@@ -12,7 +12,7 @@ class Transformer(object):
             self.end()
         except AttributeError:
             # This method is optional in subclass
-            print(test)
+            pass
 
     def process_file(self, source):
         target = self.target(source)

@@ -171,9 +171,8 @@ class Compile(Command):
         base = os.path.realpath('.')
 
         cmd = shlex.split(self.config.get('compilation', 'bibliography'))
-        cmd += [
-            '{}.aux'.format(master),
-        ]
+        cmd += [master]
+
         self.logger.debug(' '.join(cmd))
 
         try:

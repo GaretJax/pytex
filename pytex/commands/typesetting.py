@@ -1,6 +1,5 @@
 import os
 import re
-import sys
 import curses
 
 from pytex.subcommands import Command
@@ -10,7 +9,9 @@ from pytex.utils import find_files_of_type
 class FindUnreferencedAcronyms(Command):
 
     name = 'checkacronyms', 'ca'
-    acronym_regex = r'[^a-zA-Z_\\-]((?:[A-Z]+[a-z-][A-Z]+|[A-Z]{2,})[a-z0-9]{0,3})[^a-zA-Z0-9_\\-]'
+    acronym_regex = r'[^a-zA-Z_\\-]'\
+                    r'((?:[A-Z]+[a-z-][A-Z]+|[A-Z]{2,})[a-z0-9]{0,3})'\
+                    r'[^a-zA-Z0-9_\\-]'
 
     def parser(self):
         parser = self.parser_class()
@@ -33,7 +34,6 @@ class FindUnreferencedAcronyms(Command):
                     line = line.strip()
                     if line:
                         ignored.add(line)
-
 
         stdscr = curses.initscr()
         curses.savetty()
@@ -74,7 +74,6 @@ class FindUnreferencedAcronyms(Command):
                         ce = contents.find(" ", ce)
                         postfix = '...'
 
-
                     char = ms - cs
 
                     ms -= cs
@@ -82,7 +81,8 @@ class FindUnreferencedAcronyms(Command):
 
                     token = token[cs:ce]
 
-                    self.print_token_color(stdscr, f, token, line, char, ms, me, prefix, postfix)
+                    self.print_token_color(stdscr, f, token, line, char,
+                                           ms, me, prefix, postfix)
 
                     callbacks = {
                         'l': self.replace_lower,
@@ -115,7 +115,6 @@ class FindUnreferencedAcronyms(Command):
                 with open(f, 'w') as fh:
                     fh.write(contents)
 
-
     def replace_lower(self, content, start, end):
         self.replacements.append((
             start, end,
@@ -128,7 +127,6 @@ class FindUnreferencedAcronyms(Command):
             '\\Gls{{{}}}'.format(content[start:end].lower())
         ))
 
-
     def replace_lower_plural(self, content, start, end):
         name = content[start:end]
         if name.endswith('s'):
@@ -137,7 +135,6 @@ class FindUnreferencedAcronyms(Command):
             start, end,
             '\\glspl{{{}}}'.format(name.lower())
         ))
-
 
     def replace_upper_plural(self, content, start, end):
         name = content[start:end]
@@ -148,14 +145,15 @@ class FindUnreferencedAcronyms(Command):
             '\\Glspl{{{}}}'.format(name.lower())
         ))
 
-
-    def print_token_color(self, stdscr, path, token, line, char, start, end, prefix, postfix):
-        path_prefix = ':{}:{}-{}'.format(line + 1, char + 1, char + end - start)
+    def print_token_color(self, stdscr, path, token, line, char, start, end,
+                          prefix, postfix):
         abbr = token[start:end]
+        path_prefix = ':{}:{}-{}'.format(line + 1, char + 1,
+                                         char + end - start)
 
         stdscr.erase()
         stdscr.addstr(1, 5, path+path_prefix)
-        path_prefix=''
+        path_prefix = ''
 
         chunksize = 80
         line = 0
@@ -166,13 +164,13 @@ class FindUnreferencedAcronyms(Command):
             if start > chunksize:
                 start -= chunksize
             elif start is not None:
-                stdscr.addstr(3 + line, 5 + start + len(prefix), abbr, curses.A_UNDERLINE | curses.A_BOLD)
+                stdscr.addstr(3 + line, 5 + start + len(prefix), abbr,
+                              curses.A_UNDERLINE | curses.A_BOLD)
                 start = None
 
             line += 1
 
         stdscr.refresh()
-
 
     def print_token_plain(self, stdscr, token, line, char, start, end):
         prefix = '{}:{}-{} - '.format(line + 1, char + 1, char + end - start)

@@ -45,7 +45,7 @@ class LevelColoringFormatter(logging.Formatter):
 
         color = LevelColoringFormatter.LEVELS_TO_COLORS[level]
         return s.replace(record.levelname,
-                hilite(record.levelname, color=color), 1)
+                         hilite(record.levelname, color=color), 1)
 
 
 class StdioOnnaStick(object):
@@ -99,12 +99,13 @@ class LoggingSubsystem(object):
 
     def start(self):
         # Configure logging
-        file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - " \
-                "%(name)s - %(message)s (%(pathname)s:%(lineno)d)")
+        file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - "
+                                           "%(name)s - %(message)s "
+                                           "(%(pathname)s:%(lineno)d)")
 
         if sys.__stdout__.isatty():
-            console_formatter = LevelColoringFormatter("%(levelname)10s: " \
-                    "%(message)s")
+            console_formatter = LevelColoringFormatter("%(levelname)10s: "
+                                                       "%(message)s")
         else:
             console_formatter = logging.Formatter("%(message)s")
 
@@ -150,5 +151,5 @@ class LoggingSubsystem(object):
             self.buffered_handler.close()
 
             print >>sys.__stdout__, "pytex exited with a non-zero exit " \
-                    "status (%d). A complete log was stored in the %s " \
-                    "file." % (status, self.logfile)
+                "status (%d). A complete log was stored in the %s " \
+                "file." % (status, self.logfile)

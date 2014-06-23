@@ -29,7 +29,7 @@ class Update(Command):
 
     name = 'update-templates'
     help = 'Updates the current templates set by pulling '\
-            'the latest changes from the remote git repository.'
+           'the latest changes from the remote git repository.'
 
     def execute(self, args):
         raise NotImplementedError()

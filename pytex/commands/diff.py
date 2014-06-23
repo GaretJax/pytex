@@ -9,7 +9,8 @@ from pytex.commands import building
 class Compare(Command):
 
     name = 'diff'
-    help = 'Creates a PDF document highligthing the changes between two tags in the repository.'
+    help = 'Creates a PDF document highlighting the changes'\
+           'between two tags in the repository.'
 
     def parser(self):
         parser = self.parser_class()
@@ -55,7 +56,7 @@ class Compare(Command):
         if os.path.exists(diff_dir):
             shutil.rmtree(diff_dir)
         shutil.copytree(to_dir, diff_dir,
-                ignore=shutil.ignore_patterns('*.tex'))
+                        ignore=shutil.ignore_patterns('*.tex'))
 
         # TODO: Is it correct to simply ignore files present in
         # the older version which aren't anymore in the new one?
@@ -97,7 +98,8 @@ class Compare(Command):
                         fh.write(out)
 
         # Build the resulting document
-        dest = os.path.join(base, '{}-diff-{}-{}.pdf'.format(name, args.from_ref, args.to_ref))
+        dest = os.path.join(base, '{}-diff-{}-{}.pdf'
+                                  .format(name, args.from_ref, args.to_ref))
         self.compile(diff_dir, dest)
 
 

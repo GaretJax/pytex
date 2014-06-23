@@ -1,9 +1,16 @@
+import sys
+
 class Processor(object):
 
     def process_file(self, source, target):
-        self.f = open(target, 'w')
+        with open(target, 'w') as self.f:
+            with open(source, 'r') as sourcefile:
+                for line in sourcefile.read().splitlines():
+                    self.process_line(line)
+    
+    def process_file_out(self, source):
+        self.f = sys.stdout
 
-        for line in open(source, 'r').read().splitlines():
-            self.process_line(line)
-
-        self.f.close()
+        with open(source, 'r') as sourcefile:
+            for line in sourcefile.read().splitlines():
+                self.process_line(line)

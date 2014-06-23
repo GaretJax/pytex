@@ -1,5 +1,6 @@
 import sys
 
+
 class Processor(object):
 
     def process_file(self, source, target):
@@ -7,7 +8,7 @@ class Processor(object):
             with open(source, 'r') as sourcefile:
                 for line in sourcefile.read().splitlines():
                     self.process_line(line)
-    
+
     def process_file_out(self, source):
         self.f = sys.stdout
 

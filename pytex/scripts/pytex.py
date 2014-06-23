@@ -14,10 +14,10 @@ def build_parser():
     parser.add_argument('--version', action='version',
                         version='%(prog)s ' + pytex.VERSION)
     parser.add_argument('-v', '--verbose', default=list(),
-                        action='append_const', const=1, help='Increments the' \
+                        action='append_const', const=1, help='Increments the'
                         ' verbosity (can be used multiple times).')
     parser.add_argument('-q', '--quiet', default=list(),
-                        action='append_const', const=1, help='Decrements the' \
+                        action='append_const', const=1, help='Decrements the'
                         ' verbosity (can be used multiple times).')
 
     commands = subcommands.load('pytex.commands')

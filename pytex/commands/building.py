@@ -293,6 +293,8 @@ class Watch(Compile):
         if ignore_regex_str:
             ignore_regex = re.compile(ignore_regex_str)
 
+        processors = loadprocessors(self.config, self.logger)
+
         def handler(event):
             relative = event.path[len(base) + 1:]
 
@@ -330,6 +332,11 @@ class Watch(Compile):
             if event.path.endswith('.log'):
                 self.logger.debug('Ignoring {!r}'.format(relative))
                 return
+
+            for p in processors:
+                if p.wants(event.path):
+                    p.process_file(event.path)
+                    return
 
             if isinstance(event, monitor.base.FileCreated):
                 if event.path.endswith('.tex'):

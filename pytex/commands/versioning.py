@@ -63,11 +63,65 @@ class Save(Command):
 saving_command = Save()
 
 
+class Pull(Command):
+
+    name = 'pull'
+    help = 'Pull changes from remote repository'
+
+    def parser(self):
+        parser = self.parser_class()
+        return parser
+
+    def execute(self, args):
+        self.versions().pull()
+
+pull_command = Pull()
+
+
+class Push(Command):
+
+    name = 'push'
+    help = 'Push changes to remote repository'
+
+    def parser(self):
+        parser = self.parser_class()
+        return parser
+
+    def execute(self, args):
+        self.versions().push()
+
+push_command = Push()
+
+
+class Sync(Command):
+
+    name = 'sync'
+    help = 'Synchronize with the remote directory (commit -> pull -> push)'
+
+    def parser(self):
+        parser = self.parser_class()
+        parser.add_argument('-m', '--message')
+        return parser
+
+    def execute(self, args):
+        message = args.message
+
+        if not message:
+            message = self.config.get('versioning', 'commitmessage')
+
+        self.versions().addall().commit(message)
+
+        self.versions().pull()
+        self.versions().push()
+
+sync_command = Sync()
+
+
 class Tag(Command):
 
     name = 'tag'
-    help = 'Creates a tagged version of the document'\
-           'out of the currently active commit.'
+    help = ('Creates a tagged version of the document',
+            'out of the currently active commit.')
 
     def parser(self):
         parser = self.parser_class()

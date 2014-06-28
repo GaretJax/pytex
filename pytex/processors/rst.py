@@ -20,6 +20,7 @@ class RstProcessor(Transformer):
     def target(self, source):
         return source.replace('.tex.rst', '.tex')
 
+    # Checks that no list is still open
     def end(self):
         if self.list_stack:
             self.logger.error("Something went wrong in list handling")

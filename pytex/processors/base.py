@@ -3,6 +3,7 @@ import sys
 
 class Transformer(object):
 
+    # Process the file and outputs the result to self.
     def run(self, source):
         with open(source, 'r') as sourcefile:
             for line in sourcefile.read().splitlines():
@@ -14,6 +15,7 @@ class Transformer(object):
             # This method is optional in subclass
             pass
 
+    # Process file and write the result to the transformed file
     def process_file(self, source):
         target = self.target(source)
 
@@ -22,6 +24,7 @@ class Transformer(object):
         with open(target, 'w') as self.f:
             self.run(source)
 
+    # Process file and outputs the results on the command line
     def process_file_out(self, source):
         self.f = sys.stdout
 

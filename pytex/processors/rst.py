@@ -139,16 +139,62 @@ class RstProcessor(Transformer):
     def handle_emphasis(self, line):
         return self.handle_style(line, "*", "textit")
 
+    # Handle sections
+    def handle_sections(self, lines):
+        levels = []
+
+        for i in range(len(lines) - 2):
+            first_line = lines[i]
+            second_line = lines[i+1]
+
+            if len(second_line) > 0:
+                c = 0
+                char = second_line[0]
+                if char in ('#', '-', '_', '*', '+'):
+                    while c < len(second_line) and second_line[c] is char:
+                        c = c + 1
+
+                if c > 0:
+                    if not char in levels:
+                        levels.append(char)
+
+                    index = levels.index(char)
+
+                    if index == 0:
+                        self.print_line("\section{" + first_line + "}")
+                    elif index == 1:
+                        self.print_line("\subsection{" + first_line + "}")
+                    elif index == 2:
+                        self.print_line("\subsubsection{" + first_line + "}")
+                    else:
+                        self.print_line("Section too dep:" + first_line)
+
+                    lines[i+1] = ""
+                else:
+                    self.print_line(first_line)
+            else:
+                self.print_line(first_line)
+
+        # Print the very last line
+        self.print_line(lines[len(lines) - 1])
+
     # Process a single line
     def process_lines(self, lines, step):
-        # Handle lists
+        # Handle sections
         if step == 0:
+            self.handle_sections(lines)
+
+            return True
+
+        # Handle lists
+        if step == 1:
             for line in lines:
                 self.print_line(self.handle_lists(line))
 
             return True
 
-        if step == 1:
+        # Handle styles
+        if step == 2:
             for line in lines:
                 # Handle bold
                 processed = self.handle_bold(line)

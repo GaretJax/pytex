@@ -1,5 +1,3 @@
-import os
-
 from collections import namedtuple
 
 from base import Transformer
@@ -155,16 +153,16 @@ class RstProcessor(Transformer):
                         c = c + 1
 
                 if c > 0:
-                    if not char in levels:
+                    if char not in levels:
                         levels.append(char)
 
                     index = levels.index(char)
 
-                    if index == 0:
+                    if index is 0:
                         self.print_line("\section{" + first_line + "}")
-                    elif index == 1:
+                    elif index is 1:
                         self.print_line("\subsection{" + first_line + "}")
-                    elif index == 2:
+                    elif index is 2:
                         self.print_line("\subsubsection{" + first_line + "}")
                     else:
                         self.print_line("Section too dep:" + first_line)
@@ -181,20 +179,20 @@ class RstProcessor(Transformer):
     # Process a single line
     def process_lines(self, lines, step):
         # Handle sections
-        if step == 0:
+        if step is 0:
             self.handle_sections(lines)
 
             return True
 
         # Handle lists
-        if step == 1:
+        if step is 1:
             for line in lines:
                 self.print_line(self.handle_lists(line))
 
             return True
 
         # Handle styles
-        if step == 2:
+        if step is 2:
             for line in lines:
                 # Handle bold
                 processed = self.handle_bold(line)
@@ -205,4 +203,3 @@ class RstProcessor(Transformer):
                 self.print_line(processed)
 
             return False
-

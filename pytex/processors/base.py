@@ -1,13 +1,23 @@
 import sys
+import os
 
 
 class Transformer(object):
+    processed_lines = []
 
     # Process the file and outputs the result to self.
     def run(self, source):
         with open(source, 'r') as sourcefile:
-            for line in sourcefile.read().splitlines():
-                self.process_line(line)
+            source_lines = sourcefile.read().splitlines()
+
+        step = 0
+        while self.process_lines(source_lines, step):
+            source_lines = self.processed_lines
+            ++step
+
+        for line in self.processed_lines:
+            self.f.write(line)
+            self.f.write(os.linesep)
 
         try:
             self.end()
@@ -29,3 +39,10 @@ class Transformer(object):
         self.f = sys.stdout
 
         self.run(source)
+
+    # print a line (save it for later)
+    def print_line(self, line):
+        self.f.write(line)
+        self.f.write(os.linesep)
+
+        self.processed_lines.append(line)

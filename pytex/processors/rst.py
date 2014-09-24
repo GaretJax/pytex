@@ -25,11 +25,6 @@ class RstProcessor(Transformer):
         if self.list_stack:
             self.logger.error("Something went wrong in list handling")
 
-    # print a line to the target file
-    def print_line(self, line):
-        self.f.write(line)
-        self.f.write(os.linesep)
-
     # start a list
     def start_list(self, depth, type):
         self.list_stack.append(List(depth, type))
@@ -145,14 +140,17 @@ class RstProcessor(Transformer):
         return self.handle_style(line, "*", "textit")
 
     # Process a single line
-    def process_line(self, line):
-        # Handle lists
-        processed = self.handle_lists(line)
+    def process_lines(self, lines, step):
+        for line in lines:
+            # Handle lists
+            processed = self.handle_lists(line)
 
-        # Handle bold
-        processed = self.handle_bold(processed)
+            # Handle bold
+            processed = self.handle_bold(processed)
 
-        # Handle emphasis
-        processed = self.handle_emphasis(processed)
+            # Handle emphasis
+            processed = self.handle_emphasis(processed)
 
-        self.print_line(processed)
+            self.print_line(processed)
+
+        return False

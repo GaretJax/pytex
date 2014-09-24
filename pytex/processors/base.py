@@ -13,7 +13,8 @@ class Transformer(object):
         step = 0
         while self.process_lines(source_lines, step):
             source_lines = self.processed_lines
-            ++step
+            self.processed_lines = []
+            step = step + 1
 
         for line in self.processed_lines:
             self.f.write(line)
@@ -42,7 +43,4 @@ class Transformer(object):
 
     # print a line (save it for later)
     def print_line(self, line):
-        self.f.write(line)
-        self.f.write(os.linesep)
-
         self.processed_lines.append(line)

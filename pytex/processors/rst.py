@@ -141,16 +141,22 @@ class RstProcessor(Transformer):
 
     # Process a single line
     def process_lines(self, lines, step):
-        for line in lines:
-            # Handle lists
-            processed = self.handle_lists(line)
+        # Handle lists
+        if step == 0:
+            for line in lines:
+                self.print_line(self.handle_lists(line))
 
-            # Handle bold
-            processed = self.handle_bold(processed)
+            return True
 
-            # Handle emphasis
-            processed = self.handle_emphasis(processed)
+        if step == 1:
+            for line in lines:
+                # Handle bold
+                processed = self.handle_bold(line)
 
-            self.print_line(processed)
+                # Handle emphasis
+                processed = self.handle_emphasis(processed)
 
-        return False
+                self.print_line(processed)
+
+            return False
+

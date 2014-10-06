@@ -145,7 +145,7 @@ class RstProcessor(Transformer):
             first_line = lines[i]
             second_line = lines[i+1]
 
-            if len(second_line) > 0:
+            if len(first_line) > 0 and len(second_line) > 0:
                 c = 0
                 char = second_line[0]
                 if char in ('#', '-', '_', '*', '+'):

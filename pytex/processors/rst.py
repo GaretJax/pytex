@@ -152,7 +152,7 @@ class RstProcessor(Transformer):
                     while c < len(second_line) and second_line[c] is char:
                         c = c + 1
 
-                if c > 0:
+                if c >= 3 and c <= len(first_line):
                     if char not in levels:
                         levels.append(char)
 

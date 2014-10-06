@@ -165,7 +165,7 @@ class RstProcessor(Transformer):
                     elif index is 2:
                         self.print_line("\subsubsection{" + first_line + "}")
                     else:
-                        self.print_line("Section too dep:" + first_line)
+                        self.print_line("Section too deep:" + first_line)
 
                     lines[i+1] = ""
                 else:

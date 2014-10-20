@@ -26,6 +26,8 @@ class Transformer(object):
             # This method is optional in subclass
             pass
 
+        self.processed_lines = []
+
     # Process file and write the result to the transformed file
     def process_file(self, source):
         target = self.target(source)

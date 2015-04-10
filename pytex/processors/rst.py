@@ -141,9 +141,20 @@ class RstProcessor(Transformer):
     def handle_sections(self, lines):
         levels = []
 
+        ignored = False
+
         for i in range(len(lines) - 2):
             first_line = lines[i]
             second_line = lines[i+1]
+
+            if "__rst_ignore__" in first_line:
+                ignored = not ignored
+                self.print_line(first_line)
+                continue
+
+            if ignored:
+                self.print_line(first_line)
+                continue
 
             if len(first_line) > 0 and len(second_line) > 0:
                 c = 0
@@ -176,7 +187,7 @@ class RstProcessor(Transformer):
         # Print the very last line
         self.print_line(lines[len(lines) - 1])
 
-    # Process a single line
+    # Process a single file
     def process_lines(self, lines, step):
         # Handle sections
         if step is 0:
@@ -184,16 +195,24 @@ class RstProcessor(Transformer):
 
             return True
 
-        # Handle lists
-        if step is 1:
-            for line in lines:
+        ignored = False
+
+        for line in lines:
+            if "__rst_ignore__" in line:
+                ignored = not ignored
+                self.print_line(line)
+                continue
+
+            if ignored:
+                self.print_line(line)
+                continue
+
+            # Handle lists
+            if step is 1:
                 self.print_line(self.handle_lists(line))
 
-            return True
-
-        # Handle styles
-        if step is 2:
-            for line in lines:
+            # Handle styles
+            if step is 2:
                 # Handle bold
                 processed = self.handle_bold(line)
 
@@ -202,4 +221,4 @@ class RstProcessor(Transformer):
 
                 self.print_line(processed)
 
-            return False
+        return step is 1

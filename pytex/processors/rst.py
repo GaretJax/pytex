@@ -164,33 +164,39 @@ class RstProcessor(Transformer):
         return line
 
     # Handle some ReST style
-    def handle_style(self, line, rst, latex):
-        first_index = line.find(rst)
+    def handle_style(self, line, rst_begin, rst_end, latex):
+        first_index = line.find(rst_begin)
 
         while first_index != -1:
-            second_index = line.find(rst, first_index+len(rst))
+            second_index = line.find(rst_end, first_index+len(rst_begin))
 
             if second_index == -1:
                 break
 
-            if second_index - first_index > len(rst):
+            if second_index - first_index > len(rst_begin):
                 line = line[:first_index] + \
                     "\\" + latex + "{" + \
-                    line[first_index+len(rst):second_index] + \
+                    line[first_index+len(rst_begin):second_index] + \
                     "}" + \
-                    line[second_index+len(rst):]
+                    line[second_index+len(rst_end):]
 
-            first_index = line.find(rst, second_index+len(rst))
+                print line
+
+            first_index = line.find(rst_begin, second_index+len(rst_end))
 
         return line
 
+    # Handle inline code
+    def handle_inline(self, line):
+        return self.handle_style(line, ":code:`", "`", "cppi")
+
     # Handle bold
     def handle_bold(self, line):
-        return self.handle_style(line, "**", "textbf")
+        return self.handle_style(line, "**", "**", "textbf")
 
     # Handle emphasis
     def handle_emphasis(self, line):
-        return self.handle_style(line, "*", "textit")
+        return self.handle_style(line, "*", "*", "textit")
 
     # Handle sections
     def handle_code(self, lines):
@@ -304,8 +310,11 @@ class RstProcessor(Transformer):
 
             # Handle styles
             if step is 4:
+                # Handle inline code
+                processed = self.handle_inline(line)
+
                 # Handle bold
-                processed = self.handle_bold(line)
+                processed = self.handle_bold(processed)
 
                 # Handle emphasis
                 processed = self.handle_emphasis(processed)

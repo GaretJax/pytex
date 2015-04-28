@@ -126,6 +126,32 @@ class RstProcessor(Transformer):
             self.inside_frame = True
 
             return "\\begin{frame}[fragile]{" + frame_name + "}"
+        elif stripped.startswith('.. toc::'):
+            toc_name = stripped.replace('.. toc::', "")
+            toc_name = toc_name.strip()
+
+            # By default full TOC is shown
+            if not toc_name:
+                toc_name = "main"
+
+            if toc_name == "main":
+                self.print_line("\\begin{frame}{Table of Contents}")
+                self.print_line("\\tableofcontents[hidesubsections]")
+                self.print_line("\\end{frame}")
+            elif toc_name == "current":
+                self.print_line("\\begin{frame}{Table of Contents}")
+                self.print_line("\\tableofcontents[currentsection,hideothersubsections]")
+                self.print_line("\\end{frame}")
+            elif toc_name == "shallow":
+                self.print_line("\\begin{frame}{Table of Contents}")
+                self.print_line("\\begingroup");
+                self.print_line("\\setcounter{tocdepth}{1}");
+                self.print_line("\\tableofcontents[currentsection]");
+                self.print_line("\\endgroup");
+                self.print_line("\\end{frame}")
+
+            return "";
+
         elif stripped.startswith('\end{document}'):
             self.end_frame()
         elif stripped.startswith('\section'):

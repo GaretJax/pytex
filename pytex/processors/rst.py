@@ -7,6 +7,7 @@ List = namedtuple("List", "depth type")
 
 class RstProcessor(Transformer):
     list_stack = []
+    inside_frame = False
 
     name = "RestructuredText processor"
 
@@ -107,6 +108,34 @@ class RstProcessor(Transformer):
                 self.end_list()
 
             return line
+
+    # End frame
+    def end_frame(self):
+        if self.inside_frame:
+            self.print_line("\\end{frame}")
+            self.inside_frame = False
+
+    # Handle frames
+    def handle_frames(self, line):
+        stripped = line.rstrip()
+
+        if stripped.startswith('.. frame:: '):
+            self.end_frame()
+
+            frame_name = stripped.replace('.. frame:: ', "")
+            self.inside_frame = True
+
+            return "\\begin{frame}[fragile]{" + frame_name + "}"
+        elif stripped.startswith('\end{document}'):
+            self.end_frame()
+        elif stripped.startswith('\section'):
+            self.end_frame()
+        elif stripped.startswith('\subsection'):
+            self.end_frame()
+        elif stripped.startswith('\subsubsection'):
+            self.end_frame()
+
+        return line
 
     # Handle some ReST style
     def handle_style(self, line, rst, latex):
@@ -209,10 +238,14 @@ class RstProcessor(Transformer):
 
             # Handle lists
             if step is 1:
+                self.print_line(self.handle_frames(line))
+
+            # Handle lists
+            if step is 2:
                 self.print_line(self.handle_lists(line))
 
             # Handle styles
-            if step is 2:
+            if step is 3:
                 # Handle bold
                 processed = self.handle_bold(line)
 
@@ -221,4 +254,4 @@ class RstProcessor(Transformer):
 
                 self.print_line(processed)
 
-        return step is 1
+        return step < 3

@@ -180,8 +180,6 @@ class RstProcessor(Transformer):
                     "}" + \
                     line[second_index+len(rst_end):]
 
-                print line
-
             first_index = line.find(rst_begin, second_index+len(rst_end))
 
         return line

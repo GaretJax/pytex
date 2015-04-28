@@ -193,6 +193,32 @@ class RstProcessor(Transformer):
         return self.handle_style(line, "*", "textit")
 
     # Handle sections
+    def handle_code(self, lines):
+        inside_code = False
+
+        for line in lines:
+            stripped = line.rstrip()
+
+            if stripped.startswith('.. code:: '):
+                code = stripped.replace('.. code:: ', "")
+                code = code.strip()
+
+                if not code:
+                    code = "cpp"
+
+                inside_code = True
+
+                self.print_line("%__rst_ignore__")
+                self.print_line("\\begin{" + code + "code}")
+            elif inside_code and not stripped.startswith('  '):
+                inside_code = False
+                self.print_line("\\end{" + code + "code}")
+                self.print_line("%__rst_ignore__")
+                self.print_line(line)
+            else: 
+                self.print_line(line)
+
+    # Handle sections
     def handle_sections(self, lines):
         levels = []
 
@@ -244,8 +270,14 @@ class RstProcessor(Transformer):
 
     # Process a single file
     def process_lines(self, lines, step):
-        # Handle sections
+        # Handle code blocks
         if step is 0:
+            self.handle_code(lines)
+
+            return True
+
+        # Handle sections
+        if step is 1:
             self.handle_sections(lines)
 
             return True
@@ -263,15 +295,15 @@ class RstProcessor(Transformer):
                 continue
 
             # Handle lists
-            if step is 1:
+            if step is 2:
                 self.print_line(self.handle_frames(line))
 
             # Handle lists
-            if step is 2:
+            if step is 3:
                 self.print_line(self.handle_lists(line))
 
             # Handle styles
-            if step is 3:
+            if step is 4:
                 # Handle bold
                 processed = self.handle_bold(line)
 
@@ -280,4 +312,4 @@ class RstProcessor(Transformer):
 
                 self.print_line(processed)
 
-        return step < 3
+        return step < 4

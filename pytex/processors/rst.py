@@ -126,6 +126,24 @@ class RstProcessor(Transformer):
             self.inside_frame = True
 
             return "\\begin{frame}[fragile]{" + frame_name + "}"
+        elif stripped.startswith('.. sframe:: '):
+            self.end_frame()
+
+            frame_name = stripped.replace('.. sframe:: ', "")
+            self.inside_frame = True
+
+            self.print_line("\section{" + frame_name + "}")
+
+            return "\\begin{frame}[fragile]{" + frame_name + "}"
+        elif stripped.startswith('.. ssframe:: '):
+            self.end_frame()
+
+            frame_name = stripped.replace('.. ssframe:: ', "")
+            self.inside_frame = True
+
+            self.print_line("\subsection{" + frame_name + "}")
+
+            return "\\begin{frame}[fragile]{" + frame_name + "}"
         elif stripped.startswith('.. toc::'):
             toc_name = stripped.replace('.. toc::', "")
             toc_name = toc_name.strip()
@@ -219,7 +237,7 @@ class RstProcessor(Transformer):
                 self.print_line("\\end{" + code + "code}")
                 self.print_line("%__rst_ignore__")
                 self.print_line(line)
-            else: 
+            else:
                 self.print_line(line)
 
     # Handle sections
@@ -274,6 +292,8 @@ class RstProcessor(Transformer):
 
     # Process a single file
     def process_lines(self, lines, step):
+        ignored = False
+
         # Handle code blocks
         if step is 0:
             self.handle_code(lines)
@@ -286,8 +306,6 @@ class RstProcessor(Transformer):
 
             return True
 
-        ignored = False
-
         for line in lines:
             if "__rst_ignore__" in line:
                 ignored = not ignored
@@ -298,7 +316,7 @@ class RstProcessor(Transformer):
                 self.print_line(line)
                 continue
 
-            # Handle lists
+            # Handle frames
             if step is 2:
                 self.print_line(self.handle_frames(line))
 

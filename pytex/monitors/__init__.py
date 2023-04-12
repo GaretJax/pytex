@@ -4,4 +4,4 @@ except ImportError:
     from pytex.monitors import fsevents as monitor
 
 
-__all__ = ['monitor']
+__all__ = ["monitor"]

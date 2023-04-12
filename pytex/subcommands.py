@@ -2,11 +2,11 @@
 Tools and utilities to work with subcommands and argparse.
 """
 
-import os
-import inspect
-import importlib
-import itertools
 import argparse
+import importlib
+import inspect
+import itertools
+import os
 
 from pytex import versioning
 
@@ -17,28 +17,34 @@ class Command(object):
     """
 
     parser_class = argparse.ArgumentParser
-    help = ''
+    help = ""
 
     def get_name(self):
-        names = getattr(self, 'name', None)
+        names = getattr(self, "name", None)
 
         if not names:
-            raise ValueError('No name defined for command {}'
-                             .format(self.__class__.__name__))
+            raise ValueError(
+                "No name defined for command {}".format(
+                    self.__class__.__name__
+                )
+            )
 
-        if not isinstance(names, basestring):
+        if not isinstance(names, str):
             names = names[0]
 
         return names
 
     def get_names(self):
-        names = getattr(self, 'name', None)
+        names = getattr(self, "name", None)
 
         if not names:
-            raise ValueError('No name defined for command {}'
-                             .format(self.__class__.__name__))
+            raise ValueError(
+                "No name defined for command {}".format(
+                    self.__class__.__name__
+                )
+            )
 
-        if isinstance(names, basestring):
+        if isinstance(names, str):
             names = [names]
 
         return names
@@ -55,13 +61,12 @@ class Command(object):
         self.config = config
 
     def versions(self, path=None):
-        if not getattr(self, '_version_control', None):
+        if not getattr(self, "_version_control", None):
             self._version_control = {}
 
         if path not in self._version_control:
             self._version_control[path] = versioning.VersionControl(
-                self.logger,
-                path
+                self.logger, path
             )
 
         return self._version_control[path]
@@ -75,19 +80,20 @@ class Command(object):
 
 class _AttachableSubParsersAction(argparse._SubParsersAction):
     def attach_parser(self, name, parser, help=None):
-        if isinstance(name, basestring):
+        if isinstance(name, str):
             name = [name]
 
-        parser.prog = '%s %s' % (self._prog_prefix, name[0])
+        parser.prog = "%s %s" % (self._prog_prefix, name[0])
 
         # create a pseudo-action to hold the choice help
         if help:
-            choice_action = self._ChoicesPseudoAction(','.join(name), help)
+            choice_action = self._ChoicesPseudoAction(name[0], name[1:], help)
             self._choices_actions.append(choice_action)
 
         # add the parser to the map
         for n in name:
             self._name_parser_map[n] = parser
+
         return parser
 
 
@@ -99,10 +105,10 @@ def load(package):
     base = os.path.dirname(importlib.import_module(package).__file__)
 
     commands = os.listdir(base)
-    commands = (c for c in commands if not c.startswith('_'))
-    commands = (c for c in commands if c.endswith('.py'))
-    commands = (c.rsplit('.', 1)[0] for c in commands)
-    commands = ('{}.{}'.format(package, c) for c in commands)
+    commands = (c for c in commands if not c.startswith("_"))
+    commands = (c for c in commands if c.endswith(".py"))
+    commands = (c.rsplit(".", 1)[0] for c in commands)
+    commands = ("{}.{}".format(package, c) for c in commands)
     commands = (importlib.import_module(c) for c in commands)
     commands = list((inspect.getmembers(c, iscommand) for c in commands))
     commands = itertools.chain.from_iterable(commands)
@@ -112,9 +118,9 @@ def load(package):
 
 
 def attach(parser, subcommands):
-    parser.register('action', 'parsers', _AttachableSubParsersAction)
+    parser.register("action", "parsers", _AttachableSubParsersAction)
 
-    subparsers = parser.add_subparsers(title='subcommands')
+    subparsers = parser.add_subparsers(title="subcommands")
     for command in subcommands:
         command.attach(subparsers)
 

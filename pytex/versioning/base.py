@@ -4,7 +4,6 @@ import subprocess
 
 
 class VersionControlProvider(object):
-
     def __init__(self, logger, path=None):
         if path is None:
             path = os.getcwd()

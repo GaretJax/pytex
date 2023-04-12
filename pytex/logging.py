@@ -1,13 +1,17 @@
 from __future__ import absolute_import
 
-from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL
 import logging
 import logging.handlers
 import sys
+from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING
 
 
 __all__ = [
-    'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL',
+    "DEBUG",
+    "INFO",
+    "WARNING",
+    "ERROR",
+    "CRITICAL",
 ]
 
 
@@ -21,9 +25,9 @@ def hilite(string, color=None, bold=False, background=None):
         attr.append(str(background + 40))
 
     if bold:
-        attr.append('1')
+        attr.append("1")
 
-    return '\x1b[{0}m{1}\x1b[0m'.format(';'.join(attr), string)
+    return "\x1b[{0}m{1}\x1b[0m".format(";".join(attr), string)
 
 
 class LevelColoringFormatter(logging.Formatter):
@@ -44,8 +48,9 @@ class LevelColoringFormatter(logging.Formatter):
         level = level // 10 * 10
 
         color = LevelColoringFormatter.LEVELS_TO_COLORS[level]
-        return s.replace(record.levelname,
-                         hilite(record.levelname, color=color), 1)
+        return s.replace(
+            record.levelname, hilite(record.levelname, color=color), 1
+        )
 
 
 class StdioOnnaStick(object):
@@ -55,12 +60,12 @@ class StdioOnnaStick(object):
     """
 
     softspace = 0
-    mode = 'wb'
-    name = '<stdio (log)>'
+    mode = "wb"
+    name = "<stdio (log)>"
     closed = 0
 
     def __init__(self, callback):
-        self.buf = ''
+        self.buf = ""
         self.callback = callback
 
     def close(self):
@@ -81,7 +86,7 @@ class StdioOnnaStick(object):
     tell = read
 
     def write(self, data):
-        d = (self.buf + data).split('\n')
+        d = (self.buf + data).split("\n")
         self.buf = d[-1]
         messages = d[0:-1]
         for message in messages:
@@ -99,13 +104,16 @@ class LoggingSubsystem(object):
 
     def start(self):
         # Configure logging
-        file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - "
-                                           "%(name)s - %(message)s "
-                                           "(%(pathname)s:%(lineno)d)")
+        file_formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - "
+            "%(name)s - %(message)s "
+            "(%(pathname)s:%(lineno)d)"
+        )
 
         if sys.__stdout__.isatty():
-            console_formatter = LevelColoringFormatter("%(levelname)10s: "
-                                                       "%(message)s")
+            console_formatter = LevelColoringFormatter(
+                "%(levelname)10s: " "%(message)s"
+            )
         else:
             console_formatter = logging.Formatter("%(message)s")
 
@@ -116,7 +124,7 @@ class LoggingSubsystem(object):
         self.console_handler.setLevel(self.verbosity)
 
         # Capture all logging output and write it to the specified log file
-        self.file_handler = logging.FileHandler(self.logfile, 'w', delay=True)
+        self.file_handler = logging.FileHandler(self.logfile, "w", delay=True)
         self.file_handler.setFormatter(file_formatter)
         self.file_handler.setLevel(logging.ERROR)
 
@@ -133,8 +141,8 @@ class LoggingSubsystem(object):
         return logging.getLogger(name)
 
     def capture_stdout(self):
-        sys.stdout = StdioOnnaStick(logging.getLogger('stdout').info)
-        sys.stderr = StdioOnnaStick(logging.getLogger('stderr').error)
+        sys.stdout = StdioOnnaStick(logging.getLogger("stdout").info)
+        sys.stderr = StdioOnnaStick(logging.getLogger("stderr").error)
 
     def increment_verbosity(self, steps=1):
         self.verbosity = max(1, self.verbosity - 10 * steps)
@@ -150,6 +158,9 @@ class LoggingSubsystem(object):
             self.buffered_handler.flush()
             self.buffered_handler.close()
 
-            print >>sys.__stdout__, "pytex exited with a non-zero exit " \
-                "status (%d). A complete log was stored in the %s " \
-                "file." % (status, self.logfile)
+            print(
+                "pytex exited with a non-zero exit "
+                "status (%d). A complete log was stored in the %s "
+                "file." % (status, self.logfile),
+                file=sys.__stdout__,
+            )

@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
-from pytex.monitors import base
-import pyinotify
-
-from operator import attrgetter
-
-from os.path import join
 import threading
 from collections import defaultdict
+from operator import attrgetter
+from os.path import join
+
+import pyinotify
+
+from pytex.monitors import base
 
 
 class Observer(threading.Thread):
@@ -44,22 +44,22 @@ class Observer(threading.Thread):
                 self.notifier.process_events()
 
             # Send callbacks for the last item of each event
-            for k, v in self.event_buffer.iteritems():
+            for k, v in self.event_buffer.items():
                 self.final_callback(v[-1])
 
             self.event_buffer.clear()
 
     def handle_event(self, event):
-        if hasattr(event, 'cookie'):
+        if hasattr(event, "cookie"):
             events = self.linked_events.setdefault(event.cookie, [])
             events.append(event)
 
             if len(events) > 2:
-                print repr(events)
+                print(repr(events))
                 raise RuntimeError("More than 2 events with the same cookie!")
             elif len(events) == 2:
                 # Handle multiple events
-                events.sort(key=attrgetter('mask'))
+                events.sort(key=attrgetter("mask"))
                 events = [(e.mask, join(e.path, e.name)) for e in events]
                 key, paths = zip(*events)
 
@@ -78,7 +78,7 @@ class Observer(threading.Thread):
             try:
                 event_class = self.EVENT_MAPPINGS[event.mask]
             except KeyError:
-                print 'Ignoring event with opflag {}'.format(event.mask)
+                print("Ignoring event with opflag {}".format(event.mask))
             else:
                 path = join(event.path, event.name)
                 self.event_buffer[path] += [event_class(path)]

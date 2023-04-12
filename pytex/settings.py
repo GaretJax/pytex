@@ -3,15 +3,15 @@ Configuration management for the different pytex components.
 """
 
 
+import configparser
 import os
-import ConfigParser
 
 
 DEFAULT_FILES = [
-    os.path.join(os.path.dirname(__file__), 'default-settings.ini'),
-    '/etc/pytex/pytex.conf',
-    os.path.expanduser('~/.pytex.conf'),
-    os.path.join(os.path.realpath('.'), 'pytex.conf'),
+    os.path.join(os.path.dirname(__file__), "default-settings.ini"),
+    "/etc/pytex/pytex.conf",
+    os.path.expanduser("~/.pytex.conf"),
+    os.path.join(os.path.realpath("."), "pytex.conf"),
 ]
 
 
@@ -36,7 +36,7 @@ def load_config(path=None, defaults=None):
     if defaults is None:
         defaults = DEFAULT_FILES
 
-    config = ConfigParser.SafeConfigParser(allow_no_value=True)
+    config = configparser.SafeConfigParser(allow_no_value=True)
 
     if defaults:
         config.read(defaults)

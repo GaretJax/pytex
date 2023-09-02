@@ -291,7 +291,7 @@ class Watch(Compile):
             name = "{}-{}".format(name, master)
 
         if args.destination:
-            dest = args.destination
+            dest = os.path.join(os.path.realpath("."), args.destination)
         else:
             dest = os.path.join(os.path.realpath("."), name + ".pdf")
 
@@ -336,6 +336,10 @@ class Watch(Compile):
                 return
 
             if event.path.endswith(".log"):
+                self.logger.debug("Ignoring {!r}".format(relative))
+                return
+
+            if event.path.endswith(".w18"):
                 self.logger.debug("Ignoring {!r}".format(relative))
                 return
 

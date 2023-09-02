@@ -55,14 +55,19 @@ def main(args=None):
     config = settings.load_config()
 
     # Execute command
-    args.command.set_logger(logger)
-    args.command.set_config(config)
-    res = args.command.execute(args)
+    try:
+        command = args.command
+    except AttributeError:
+        pass
+    else:
+        command.set_logger(logger)
+        command.set_config(config)
+        res = command.execute(args)
 
-    # Shutdown logging
-    logger.stop(res)
+        # Shutdown logging
+        logger.stop(res)
 
-    return res
+        return res
 
 
 if __name__ == "__main__":
